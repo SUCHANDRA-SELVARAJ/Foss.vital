@@ -1,0 +1,3695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>What Makes You Rise? — A Thirukkural Experience</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Mukta+Malar:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================
+       RESET & BASE VARIABLES
+       ========================================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    :root {
+      --font-display: 'Cinzel', serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-tamil: 'Mukta Malar', sans-serif;
+      
+      --color-gold: #f6c85f;
+      --color-gold-glow: rgba(246, 200, 95, 0.4);
+      --color-cyan-glow: rgba(56, 239, 213, 0.4);
+      --color-fear: #4a5568;
+      --color-doubt: #2d3748;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0b1021;
+      font-family: var(--font-body);
+      color: #ffffff;
+      touch-action: none;
+    }
+
+    /* Fullscreen Experience Container */
+    #experience-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Canvas for Dynamic Sky, Stars, Clouds, Auroras & Particles */
+    #sky-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Foreground Hill & Silhouette SVG Layer */
+    #ground-layer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 48%;
+      z-index: 2;
+      pointer-events: none;
+      transition: transform 0.1s linear, opacity 0.5s ease;
+      will-change: transform, opacity;
+    }
+
+    /* =========================================
+       HOT AIR BALLOON (INTERACTIVE HERO)
+       ========================================= */
+    #balloon-rig {
+      position: absolute;
+      left: 50%;
+      top: 68%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 310px;
+      z-index: 10;
+      cursor: grab;
+      will-change: transform, top, filter;
+      filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.45));
+    }
+
+    #balloon-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* Burner Flame Styles */
+    .burner-flame {
+      transform-origin: 110px 186px;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+      opacity: 0.65;
+    }
+
+    .burner-flame.firing {
+      transform: scale(2.2) translateY(-6px);
+      opacity: 1;
+      filter: drop-shadow(0 0 25px rgba(255, 170, 0, 0.95)) drop-shadow(0 0 50px rgba(255, 90, 0, 0.6));
+    }
+
+    .burner-glow-circle {
+      transition: opacity 0.3s ease, r 0.3s ease;
+      opacity: 0.35;
+    }
+
+    .burner-flame.firing ~ .burner-glow-circle,
+    .balloon-glow-burst {
+      opacity: 0.85 !important;
+    }
+
+    /* Dynamic Golden Aura on Zenith */
+    #balloon-rig.zenith-glow {
+      filter: drop-shadow(0 0 45px rgba(255, 215, 0, 0.85)) drop-shadow(0 0 90px rgba(255, 180, 50, 0.6));
+      animation: celestial-pulse 3s infinite alternate ease-in-out;
+    }
+
+    @keyframes celestial-pulse {
+      0% { transform: translate(-50%, -50%) scale(1.05); }
+      100% { transform: translate(-50%, -50%) scale(1.15); }
+    }
+
+    /* Altitude Float Text Floating Off Balloon */
+    .altitude-indicator-popup {
+      position: absolute;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      pointer-events: none;
+      z-index: 25;
+      animation: floatUpFade 1.4s forwards ease-out;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translateY(0) scale(0.7); }
+      20% { opacity: 1; transform: translateY(-15px) scale(1.1); }
+      100% { opacity: 0; transform: translateY(-65px) scale(0.9); }
+    }
+
+    /* =========================================
+       THOUGHT CARDS & BUBBLES
+       ========================================= */
+    #thoughts-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .thought-card {
+      position: absolute;
+      pointer-events: auto;
+      cursor: grab;
+      border-radius: 40px;
+      padding: 10px 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.4s ease;
+      will-change: transform, left, top;
+    }
+
+    .thought-card:active {
+      cursor: grabbing;
+    }
+
+    .thought-card:hover {
+      transform: scale(1.08) translateY(-3px);
+    }
+
+    .thought-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    /* Positive Thought Styling */
+    .thought-card.positive {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 215, 100, 0.08));
+      color: #fff9e6;
+      border: 1px solid rgba(255, 225, 120, 0.45);
+      box-shadow: 0 10px 30px rgba(246, 200, 95, 0.2), inset 0 0 15px rgba(255, 240, 180, 0.15);
+    }
+
+    .thought-card.positive:hover {
+      border-color: rgba(255, 235, 150, 0.85);
+      box-shadow: 0 12px 35px rgba(246, 200, 95, 0.45), inset 0 0 20px rgba(255, 245, 200, 0.3);
+    }
+
+    .thought-card.positive .thought-label {
+      background: linear-gradient(90deg, #ffffff, #ffe599);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Specific positive variants */
+    .thought-card[data-type="AMBITION"] {
+      border-color: rgba(255, 170, 80, 0.5);
+    }
+    .thought-card[data-type="COURAGE"] {
+      border-color: rgba(255, 105, 120, 0.5);
+    }
+    .thought-card[data-type="LEARNING"] {
+      border-color: rgba(100, 220, 255, 0.5);
+    }
+    .thought-card[data-type="DREAM"] {
+      border-color: rgba(190, 140, 255, 0.5);
+    }
+    .thought-card[data-type="EFFORT"] {
+      border-color: rgba(255, 215, 0, 0.6);
+    }
+
+    /* Negative Thought Styling */
+    .thought-card.negative {
+      background: linear-gradient(135deg, rgba(30, 35, 50, 0.75), rgba(15, 20, 30, 0.9));
+      color: #cbd5e0;
+      border: 1px solid rgba(120, 130, 155, 0.3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .thought-card.negative:hover {
+      border-color: rgba(160, 175, 200, 0.55);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .thought-card.negative .thought-label {
+      color: #a0aec0;
+    }
+
+    /* Card Dragging State */
+    .thought-card.dragging {
+      z-index: 50 !important;
+      opacity: 0.9;
+      transform: scale(1.15) !important;
+      transition: none !important;
+    }
+
+    /* Fly-to-Burner Arc Animation */
+    .thought-card.absorbing {
+      pointer-events: none;
+      transition: all 0.65s cubic-bezier(0.25, 1, 0.5, 1) !important;
+      transform: scale(0.2) rotate(45deg) !important;
+      opacity: 0 !important;
+      filter: blur(8px) brightness(2.5) !important;
+    }
+
+    /* =========================================
+       HEAD-UP DISPLAY (HUD) & PROMPT
+       ========================================= */
+    #ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 30px;
+    }
+
+    /* Header & Initial Prompt */
+    .header-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: opacity 0.6s ease;
+    }
+
+    .main-prompt-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4.2vw, 2.9rem);
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: #ffffff;
+      text-shadow: 0 4px 25px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 120, 0.3);
+      margin-bottom: 6px;
+      position: relative;
+    }
+
+    .prompt-subtext {
+      font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+      font-weight: 300;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(15, 23, 42, 0.35);
+      padding: 6px 18px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Top Corner Controls */
+    .top-controls {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      display: flex;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #ffffff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.08);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Altitude & Stage Bar */
+    .altitude-dashboard {
+      position: absolute;
+      left: 30px;
+      top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(12px);
+      padding: 12px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      min-width: 190px;
+    }
+
+    .altitude-stage-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .altitude-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .altitude-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .altitude-fill {
+      height: 100%;
+      width: 5%;
+      background: linear-gradient(90deg, #ff9a3c, #f6c85f, #38efd5);
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 0 10px rgba(246, 200, 95, 0.8);
+    }
+
+    .altitude-checkpoints {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 2px;
+    }
+
+    /* Bottom Interactive Tip */
+    .bottom-hint {
+      text-align: center;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      transition: opacity 0.4s ease;
+    }
+
+    /* =========================================
+       CLIMAX & THIRUKKURAL REVELATION MODAL
+       ========================================= */
+    #climax-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.82) 0%, rgba(5, 7, 18, 0.95) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #climax-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .climax-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 215, 120, 0.03));
+      border: 1px solid rgba(255, 220, 130, 0.35);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 80px rgba(246, 200, 95, 0.2);
+      border-radius: 28px;
+      padding: clamp(30px, 5vw, 60px);
+      max-width: 820px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .climax-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 215, 100, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+      animation: ambientRotate 20s linear infinite;
+    }
+
+    @keyframes ambientRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Phase 1: Philosophy prompt */
+    .climax-prelude {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3.2vw, 2.3rem);
+      line-height: 1.4;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #fff9e6;
+      margin-bottom: 28px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease 0.4s;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .climax-prelude strong {
+      color: var(--color-gold);
+      display: block;
+      font-size: 1.05em;
+    }
+
+    /* Divider */
+    .ornate-divider {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+      margin: 15px 0 28px;
+      opacity: 0;
+      transform: scaleX(0.2);
+      transition: all 1s ease 0.9s;
+    }
+
+    /* Phase 2: Tamil Thirukkural */
+    .kural-container {
+      margin-bottom: 26px;
+      opacity: 0;
+      transform: translateY(25px);
+      transition: all 1.2s ease 1.3s;
+    }
+
+    .kural-tag {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .kural-tamil-text {
+      font-family: var(--font-tamil);
+      font-size: clamp(1.45rem, 3.4vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.55;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 25px rgba(246, 200, 95, 0.4);
+    }
+
+    /* Phase 3: Short Meaning */
+    .kural-meaning {
+      font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+      font-weight: 300;
+      line-height: 1.6;
+      color: #e2e8f0;
+      max-width: 650px;
+      margin-bottom: 34px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1.1s ease 1.8s;
+      font-style: italic;
+    }
+
+    /* Reset / Soar Again Action */
+    .restart-btn {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease 2.2s;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 14px 38px;
+      border-radius: 35px;
+      color: #0b1021;
+      background: linear-gradient(135deg, #f6c85f, #f1a93b);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(246, 200, 95, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      outline: none;
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 14px 40px rgba(246, 200, 95, 0.6);
+    }
+
+    /* Revealing active elements */
+    #climax-overlay.active .climax-prelude,
+    #climax-overlay.active .ornate-divider,
+    #climax-overlay.active .kural-container,
+    #climax-overlay.active .kural-meaning,
+    #climax-overlay.active .restart-btn {
+      opacity: 1;
+      transform: translate(0, 0) scaleX(1);
+    }
+
+    /* Responsive Tweaks */
+    @media (max-width: 768px) {
+      #ui-overlay {
+        padding: 16px;
+      }
+      .altitude-dashboard {
+        left: 16px;
+        top: 16px;
+        min-width: 150px;
+        padding: 8px 14px;
+      }
+      .altitude-value {
+        font-size: 1.1rem;
+      }
+      .top-controls {
+        top: 16px;
+        right: 16px;
+      }
+      #balloon-rig {
+        width: 170px;
+        height: 240px;
+      }
+      .thought-card {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+        gap: 6px;
+      }
+      .thought-icon {
+        font-size: 1rem;
+      }
+      .header-zone {
+        margin-top: 50px;
+      }
+    /* Thiruvalluvar Sacred Emblem */
+    .thiruvalluvar-emblem {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 14px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(246, 200, 95, 0.25) 0%, rgba(15, 23, 42, 0) 70%);
+      border: 1px solid rgba(246, 200, 95, 0.5);
+      box-shadow: 0 0 30px rgba(246, 200, 95, 0.4), inset 0 0 15px rgba(246, 200, 95, 0.2);
+      animation: valluvarGlow 3.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes valluvarGlow {
+      0% { transform: scale(1); box-shadow: 0 0 20px rgba(246, 200, 95, 0.3); }
+      100% { transform: scale(1.08); box-shadow: 0 0 45px rgba(246, 200, 95, 0.7); }
+    }
+
+    .thiruvalluvar-svg {
+      width: 60px;
+      height: 60px;
+    }
+
+    /* Auto-play progress bar on Kural card */
+    .kural-autoplay-bar {
+      width: 100%;
+      max-width: 320px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      margin: 12px auto 0;
+      overflow: hidden;
+    }
+
+    .kural-autoplay-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38efd5, #f6c85f);
+      transition: width 3.5s linear;
+    }
+
+    /* --- THE TALE OF TWO HEIGHTS (ANIMATED SIMULATION) --- */
+    #two-heights-stage {
+      width: 100%;
+      max-width: 860px;
+      height: 440px;
+      position: relative;
+      background: radial-gradient(ellipse at bottom, rgba(20, 27, 45, 0.7) 0%, rgba(6, 8, 20, 0.95) 100%);
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 50px rgba(246, 200, 95, 0.15);
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      padding: 30px 40px 60px;
+      margin: 15px auto;
+      overflow: hidden;
+    }
+
+    .flight-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 44%;
+      height: 100%;
+      position: relative;
+      justify-content: flex-end;
+    }
+
+    .flight-altitude-track {
+      position: absolute;
+      bottom: 20px;
+      width: 3px;
+      height: 280px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+    }
+
+    .flight-balloon-avatar {
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: bottom 3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .flight-tag {
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+      margin-top: 6px;
+    }
+
+    .tag-low {
+      background: rgba(100, 116, 139, 0.3);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: #94a3b8;
+    }
+
+    .tag-high {
+      background: rgba(246, 200, 95, 0.3);
+      border: 1px solid rgba(246, 200, 95, 0.8);
+      color: #ffd700;
+      box-shadow: 0 0 15px rgba(246, 200, 95, 0.5);
+    }
+
+    .flight-target-beacon {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.6);
+      right: -80px;
+    }
+
+    /* Comparison Banner */
+    .two-heights-verdict {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+      font-weight: 600;
+      color: #fff9e6;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(246, 200, 95, 0.4);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+    }
+
+    /* Look Beyond The Words CTA Button inside Kural Card */
+    .look-beyond-btn {
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 13px 32px;
+      border-radius: 35px;
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(255, 215, 100, 0.25), rgba(56, 239, 213, 0.2));
+      border: 1px solid rgba(255, 220, 130, 0.6);
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(246, 200, 95, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      outline: none;
+      transition: all 0.3s ease;
+      margin-left: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .look-beyond-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 215, 100, 0.45), rgba(56, 239, 213, 0.4));
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 0 35px rgba(246, 200, 95, 0.6);
+      border-color: rgba(255, 240, 180, 0.9);
+    }
+
+    .kural-actions-row {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease 2.2s;
+    }
+
+    #climax-overlay.active .kural-actions-row {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Master Cinematic Container */
+    #cinematic-experience-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 200;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(circle at center, #0e122b 0%, #060814 100%);
+      transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cinematic-experience-container.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Dedicated Canvas for Constellations & Cosmic Rays */
+    #cinematic-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Cinematic Stages Common Container */
+    .cine-stage {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96);
+      transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cine-stage.current-stage {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* Common Cinematic Typography */
+    .cine-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 3.8vw, 3rem);
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 50px rgba(246, 200, 95, 0.45);
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease 0.3s;
+    }
+
+    .cine-stage.current-stage .cine-title {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .cine-subtitle {
+      font-size: clamp(1.05rem, 2.2vw, 1.45rem);
+      font-weight: 300;
+      letter-spacing: 1.5px;
+      color: #e2e8f0;
+      max-width: 720px;
+      line-height: 1.6;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+      margin-bottom: 24px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease 0.6s;
+    }
+
+    .cine-stage.current-stage .cine-subtitle {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* --- STAGE 2: LOOK DOWN BUTTON & MACRO WORLD --- */
+    .look-down-btn {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 16px 42px;
+      border-radius: 40px;
+      color: #0b1021;
+      background: linear-gradient(135deg, #38efd5, #f6c85f);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 35px rgba(56, 239, 213, 0.5), 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
+      transition: all 0.35s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(56, 239, 213, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 45px rgba(246, 200, 95, 0.7); }
+    }
+
+    .look-down-btn:hover {
+      transform: scale(1.08) translateY(-3px);
+      box-shadow: 0 0 55px rgba(246, 200, 95, 0.8);
+    }
+
+    /* Macro Perspective World Container */
+    #macro-viewport {
+      width: 100%;
+      max-width: 650px;
+      height: 480px;
+      position: relative;
+      margin: 15px auto;
+      border-radius: 24px;
+      background: radial-gradient(ellipse at bottom, rgba(30, 41, 69, 0.4) 0%, rgba(8, 12, 28, 0.7) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8), 0 20px 50px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+
+    /* Starting Point Beacon at Bottom */
+    .macro-origin-dot {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .origin-beacon {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #f6c85f;
+      box-shadow: 0 0 20px #f6c85f, 0 0 40px #f6c85f;
+      animation: beaconFlash 1.6s infinite ease-in-out;
+    }
+
+    @keyframes beaconFlash {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.6); opacity: 1; }
+    }
+
+    .origin-label {
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 4px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      white-space: nowrap;
+    }
+
+    /* Altitude Path Line In Macro View */
+    .macro-altitude-line {
+      position: absolute;
+      left: 50%;
+      bottom: 40px;
+      width: 2px;
+      height: 330px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, #f6c85f 0%, rgba(56, 239, 213, 0.6) 50%, rgba(246, 200, 95, 0.1) 100%);
+      border-left: 1px dashed rgba(255, 225, 120, 0.6);
+    }
+
+    /* High Balloon In Macro View */
+    .macro-balloon-mini {
+      position: absolute;
+      left: 50%;
+      top: 60px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      filter: drop-shadow(0 0 25px rgba(246, 200, 95, 0.9));
+      animation: floatMini 3s infinite ease-in-out;
+    }
+
+    @keyframes floatMini {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    .macro-balloon-icon {
+      font-size: 2.4rem;
+    }
+
+    .macro-balloon-label {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #f6c85f;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
+
+    /* --- STAGE 3: THE HIGHEST GOAL (GIANT STAR) --- */
+    .giant-star-container {
+      position: relative;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .giant-star-symbol {
+      width: 140px;
+      height: 140px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 50px rgba(255, 230, 100, 0.9)) drop-shadow(0 0 100px rgba(255, 170, 50, 0.7));
+      animation: starRadiate 4s infinite alternate ease-in-out;
+    }
+
+    @keyframes starRadiate {
+      0% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1.12) rotate(15deg); }
+    }
+
+    .giant-star-label {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #ffd700;
+      margin-top: 14px;
+      text-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+    }
+
+    .balloon-under-star {
+      margin-top: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      animation: gentleStrive 2.5s infinite ease-in-out;
+    }
+
+    @keyframes gentleStrive {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    /* --- STAGE 4: CONSTELLATION NODES & TRANSFORMATION --- */
+    #constellation-viewport {
+      width: 100%;
+      max-width: 820px;
+      height: 380px;
+      position: relative;
+      margin: 15px auto;
+    }
+
+    .constellation-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .constellation-node {
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+
+    .constellation-node:hover {
+      filter: drop-shadow(0 0 20px #ffd700);
+    }
+
+    .constellation-line {
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      transition: stroke-dashoffset 2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .constellation-line.drawn {
+      stroke-dashoffset: 0;
+    }
+
+    /* Failure -> Learning -> Growth Badge */
+    .transformation-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .trans-badge {
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+
+    .trans-badge.badge-failure {
+      background: rgba(239, 68, 68, 0.25);
+      border: 1px solid rgba(239, 68, 68, 0.6);
+      color: #fca5a5;
+    }
+
+    .trans-badge.badge-learning {
+      background: rgba(56, 239, 213, 0.25);
+      border: 1px solid rgba(56, 239, 213, 0.7);
+      color: #a7f3d0;
+    }
+
+    .trans-badge.badge-growth {
+      background: rgba(246, 200, 95, 0.3);
+      border: 1px solid rgba(246, 200, 95, 0.8);
+      color: #fef08a;
+      box-shadow: 0 0 25px rgba(246, 200, 95, 0.5);
+    }
+
+    .trans-arrow {
+      color: var(--color-gold);
+      font-size: 1.2rem;
+    }
+
+    /* --- STAGE 5: STEP BY STEP ANIMATION CARDS --- */
+    #meaning-steps-box {
+      width: 100%;
+      max-width: 760px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .meaning-step-card {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(25px) scale(0.95);
+      transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .meaning-step-card.active-step {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .horizon-expand-ring {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 2px solid rgba(56, 239, 213, 0.6);
+      margin: 15px auto;
+      box-shadow: 0 0 40px rgba(56, 239, 213, 0.5);
+      animation: expandHorizon 3s infinite ease-out;
+    }
+
+    @keyframes expandHorizon {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    /* --- STAGE 6: INTERACTIVE SPLIT SCREEN COMPARISON --- */
+    #split-screen-wrapper {
+      width: 100%;
+      max-width: 900px;
+      height: 420px;
+      position: relative;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(246, 200, 95, 0.2);
+      margin: 15px auto;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    /* Left Panel: Smaller Thought */
+    .split-panel {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+    }
+
+    .panel-smaller {
+      left: 0;
+      width: 100%;
+      background: linear-gradient(135deg, #121622 0%, #1a1e2b 100%);
+      color: #94a3b8;
+    }
+
+    .panel-smaller .split-badge {
+      background: rgba(148, 163, 184, 0.2);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: #cbd5e1;
+    }
+
+    /* Right Panel: Higher Thought */
+    .panel-higher {
+      right: 0;
+      width: 50%; /* driven dynamically by slider */
+      background: radial-gradient(circle at 75% 25%, #2a1b4e 0%, #0d122b 60%, #060914 100%);
+      box-shadow: -5px 0 35px rgba(0, 0, 0, 0.6);
+      border-left: 2px solid rgba(246, 200, 95, 0.7);
+    }
+
+    .panel-higher .split-badge {
+      background: linear-gradient(135deg, rgba(246, 200, 95, 0.35), rgba(56, 239, 213, 0.3));
+      border: 1px solid rgba(246, 200, 95, 0.8);
+      color: #ffd700;
+      box-shadow: 0 0 20px rgba(246, 200, 95, 0.4);
+    }
+
+    .split-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+
+    .split-graphic {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .smaller-balloon-icon {
+      font-size: 2.2rem;
+      opacity: 0.5;
+      margin-top: 80px;
+    }
+
+    .smaller-ceiling-line {
+      width: 80%;
+      height: 2px;
+      background: rgba(239, 68, 68, 0.4);
+      border-bottom: 1px dashed rgba(239, 68, 68, 0.6);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .smaller-ceiling-line::after {
+      content: 'LIMIT';
+      position: absolute;
+      right: 0;
+      top: -18px;
+      font-size: 0.65rem;
+      color: #f87171;
+      letter-spacing: 1px;
+    }
+
+    .higher-balloon-icon {
+      font-size: 3.5rem;
+      filter: drop-shadow(0 0 30px rgba(246, 200, 95, 0.9));
+      animation: floatHigh 3s infinite ease-in-out;
+      margin-top: 10px;
+    }
+
+    @keyframes floatHigh {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    /* Draggable Split Handle */
+    #split-handle-bar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      background: linear-gradient(180deg, #38efd5, #f6c85f);
+      box-shadow: 0 0 15px rgba(246, 200, 95, 0.8);
+      cursor: ew-resize;
+      z-index: 30;
+      transform: translateX(-50%);
+    }
+
+    #split-handle-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f6c85f, #38efd5);
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 25px rgba(246, 200, 95, 0.8), 0 5px 20px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0b1021;
+      font-weight: 900;
+      font-size: 1.1rem;
+      cursor: ew-resize;
+      user-select: none;
+    }
+
+    /* Split Screen Caption */
+    .split-narrative {
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+      font-weight: 600;
+      color: #fff9e6;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+      margin-top: 12px;
+      min-height: 50px;
+    }
+
+    /* --- STAGE 7: FINAL COSMIC CLIMAX --- */
+    .final-path-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      padding: 12px 24px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 215, 120, 0.25);
+      backdrop-filter: blur(12px);
+    }
+
+    .path-step {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #f6c85f;
+      text-transform: uppercase;
+    }
+
+    .path-step.highlight {
+      color: #38efd5;
+      text-shadow: 0 0 10px rgba(56, 239, 213, 0.8);
+    }
+
+    .path-arrow {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.8rem;
+    }
+
+    .final-monumental-quote {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3.6vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: 2px;
+      line-height: 1.45;
+      background: linear-gradient(135deg, #ffffff 0%, #ffeaa7 50%, #f6c85f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 40px rgba(246, 200, 95, 0.45);
+      max-width: 860px;
+      margin: 18px 0 32px;
+    }
+
+    .cine-btn {
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 14px 34px;
+      border-radius: 35px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .cine-btn.primary {
+      color: #0b1021;
+      background: linear-gradient(135deg, #f6c85f, #e5a034);
+      border: none;
+      box-shadow: 0 10px 30px rgba(246, 200, 95, 0.4);
+    }
+
+    .cine-btn.primary:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 14px 40px rgba(246, 200, 95, 0.7);
+    }
+
+    .cine-btn.secondary {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+    }
+
+    .cine-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .cine-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Responsive Tweaks */
+    @media (max-width: 768px) {
+      #macro-viewport {
+        height: 340px;
+      }
+      #constellation-viewport {
+        height: 280px;
+      }
+      #split-screen-wrapper {
+        height: 340px;
+      }
+      .look-beyond-btn {
+        margin-left: 0;
+        margin-top: 10px;
+      }
+      .final-path-display {
+        gap: 6px;
+        padding: 8px 14px;
+      }
+      .path-step {
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="experience-container">
+    <!-- Dynamic Procedural Canvas (Sky, Clouds, Stars, Auroras, Stardust) -->
+    <canvas id="sky-canvas"></canvas>
+
+    <!-- Parallax Ground & Hills Layer (SVG) -->
+    <svg id="ground-layer" viewBox="0 0 1440 600" preserveAspectRatio="none">
+      <defs>
+        <!-- Mountain and hill gradients -->
+        <linearGradient id="hill-grad-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#28334f" stop-opacity="0.85" />
+          <stop offset="100%" stop-color="#151b2e" stop-opacity="1" />
+        </linearGradient>
+        <linearGradient id="hill-grad-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1e273e" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#0c111d" stop-opacity="1" />
+        </linearGradient>
+        <linearGradient id="hill-grad-front" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#161c2c" stop-opacity="1" />
+          <stop offset="100%" stop-color="#070a12" stop-opacity="1" />
+        </linearGradient>
+        <linearGradient id="ground-glow" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#f6c85f" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#f6c85f" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+
+      <!-- Soft ground morning glow -->
+      <ellipse cx="720" cy="500" rx="600" ry="200" fill="url(#ground-glow)" />
+
+      <!-- Distant rolling mountains -->
+      <path d="M0,280 C240,160 480,240 720,180 C960,120 1200,220 1440,160 L1440,600 L0,600 Z" fill="url(#hill-grad-back)" />
+      
+      <!-- Midground mountain ridge -->
+      <path d="M0,330 C300,260 550,340 850,290 C1150,240 1320,310 1440,280 L1440,600 L0,600 Z" fill="url(#hill-grad-mid)" />
+
+      <!-- Foreground hills with pine silhouettes -->
+      <path d="M0,410 C200,360 400,430 700,380 C1000,330 1250,420 1440,370 L1440,600 L0,600 Z" fill="url(#hill-grad-front)" />
+
+      <!-- Stylized Meadow Trees & Grass Accents -->
+      <g fill="#070a12">
+        <!-- Cluster 1 (Left) -->
+        <polygon points="120,440 135,390 150,440" />
+        <polygon points="123,410 135,370 147,410" />
+        <polygon points="150,460 162,415 174,460" />
+        <!-- Cluster 2 (Right) -->
+        <polygon points="1280,420 1295,365 1310,420" />
+        <polygon points="1283,385 1295,345 1307,385" />
+        <polygon points="1310,440 1322,390 1334,440" />
+      </g>
+    </svg>
+
+    <!-- Hot Air Balloon (Detailed Vector Artwork) -->
+    <div id="balloon-rig">
+      <svg id="balloon-svg" viewBox="0 0 220 310">
+        <defs>
+          <!-- Radial Burner Flame Gradient -->
+          <radialGradient id="flame-grad" cx="50%" cy="30%" r="50%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="25%" stop-color="#fff275" />
+            <stop offset="65%" stop-color="#ff7f11" />
+            <stop offset="100%" stop-color="#d62828" stop-opacity="0" />
+          </radialGradient>
+
+          <!-- Balloon Envelope Shadow & Luster -->
+          <linearGradient id="envelope-shading" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.38" />
+            <stop offset="35%" stop-color="#ffffff" stop-opacity="0.18" />
+            <stop offset="70%" stop-color="#000000" stop-opacity="0.05" />
+            <stop offset="100%" stop-color="#000000" stop-opacity="0.45" />
+          </linearGradient>
+
+          <!-- Balloon Stripe Gradients -->
+          <linearGradient id="stripe-crimson" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ff5e62" />
+            <stop offset="100%" stop-color="#ff3366" />
+          </linearGradient>
+          <linearGradient id="stripe-gold" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffe259" />
+            <stop offset="100%" stop-color="#ffa751" />
+          </linearGradient>
+          <linearGradient id="stripe-teal" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#2af598" />
+            <stop offset="100%" stop-color="#009efd" />
+          </linearGradient>
+          <linearGradient id="stripe-violet" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#b176fc" />
+            <stop offset="100%" stop-color="#6a11cb" />
+          </linearGradient>
+
+          <!-- Wicker Basket Gradient -->
+          <linearGradient id="basket-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#5c3818" />
+            <stop offset="50%" stop-color="#8c5828" />
+            <stop offset="100%" stop-color="#4a2b10" />
+          </linearGradient>
+
+          <!-- Zenith Golden Luster Gradient -->
+          <linearGradient id="zenith-envelope" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fff4cc" />
+            <stop offset="50%" stop-color="#ffd700" />
+            <stop offset="100%" stop-color="#ff9900" />
+          </linearGradient>
+        </defs>
+
+        <!-- Ambient Burner Light Aura -->
+        <circle id="burner-aura" class="burner-glow-circle" cx="110" cy="190" r="50" fill="url(#flame-grad)" opacity="0.3" />
+
+        <!-- Balloon Envelope Group -->
+        <g id="envelope-group">
+          <!-- Main Outer Balloon Silhouette -->
+          <path id="envelope-base" d="M110,10 C50,10 15,58 15,115 C15,152 45,182 82,194 L138,194 C175,182 205,152 205,115 C205,58 170,10 110,10 Z" fill="#1b2438" />
+
+          <!-- Beautiful Multi-colored Vertical Panels -->
+          <!-- Panel 1 (Leftmost edge) -->
+          <path d="M110,10 C62,10 25,58 15,115 C20,150 45,182 82,194 C55,180 35,145 35,115 C35,65 68,18 110,10 Z" fill="url(#stripe-violet)" />
+          <!-- Panel 2 -->
+          <path d="M110,10 C72,12 40,65 40,115 C40,145 60,178 85,194 C70,180 58,150 58,115 C58,68 80,18 110,10 Z" fill="url(#stripe-crimson)" />
+          <!-- Panel 3 -->
+          <path d="M110,10 C85,14 65,65 65,115 C65,150 82,185 95,194 C85,182 78,152 78,115 C78,65 92,15 110,10 Z" fill="url(#stripe-gold)" />
+          <!-- Panel 4 (Center Spine) -->
+          <path d="M110,10 C96,12 88,65 88,115 C88,155 102,192 110,194 C118,192 132,155 132,115 C132,65 124,12 110,10 Z" fill="url(#stripe-teal)" />
+          <!-- Panel 5 -->
+          <path d="M110,10 C128,14 142,65 142,115 C142,152 135,182 125,194 C138,185 155,150 155,115 C155,65 135,15 110,10 Z" fill="url(#stripe-gold)" />
+          <!-- Panel 6 -->
+          <path d="M110,10 C140,18 162,68 162,115 C162,150 150,180 135,194 C160,178 180,145 180,115 C180,65 148,12 110,10 Z" fill="url(#stripe-crimson)" />
+          <!-- Panel 7 (Rightmost edge) -->
+          <path d="M110,10 C152,18 185,65 185,115 C185,145 165,180 138,194 C175,182 200,150 205,115 C195,58 158,10 110,10 Z" fill="url(#stripe-violet)" />
+
+          <!-- Translucent 3D Volumetric Shading Overlay -->
+          <path d="M110,10 C50,10 15,58 15,115 C15,152 45,182 82,194 L138,194 C175,182 205,152 205,115 C205,58 170,10 110,10 Z" fill="url(#envelope-shading)" />
+
+          <!-- Golden Crown Cap at the Top -->
+          <ellipse cx="110" cy="11" rx="20" ry="5" fill="#ffd700" />
+          <ellipse cx="110" cy="9" rx="14" ry="3" fill="#ffffff" opacity="0.7" />
+          
+          <!-- Ornate Collar Ring at the Bottom Neck -->
+          <rect x="80" y="191" width="60" height="5" rx="2.5" fill="#ffd700" />
+        </g>
+
+        <!-- Burner Frame & Flame System -->
+        <g id="burner-group">
+          <!-- Burner Frame Rigging Metal -->
+          <line x1="88" y1="194" x2="102" y2="216" stroke="#94a3b8" stroke-width="1.8" />
+          <line x1="132" y1="194" x2="118" y2="216" stroke="#94a3b8" stroke-width="1.8" />
+          
+          <!-- Burner Nozzle -->
+          <rect x="101" y="212" width="18" height="6" rx="2" fill="#475569" stroke="#cbd5e1" stroke-width="0.8" />
+
+          <!-- Dynamic Fire Jet -->
+          <path id="burner-flame" class="burner-flame" d="M110,213 Q102,200 105,190 Q110,172 110,165 Q110,172 115,190 Q118,200 110,213 Z" fill="url(#flame-grad)" />
+        </g>
+
+        <!-- Suspension Ropes Connecting Envelope to Basket -->
+        <g stroke="#d4af37" stroke-width="1.2" opacity="0.85">
+          <line x1="84" y1="194" x2="94" y2="242" />
+          <line x1="94" y1="194" x2="98" y2="242" />
+          <line x1="126" y1="194" x2="122" y2="242" />
+          <line x1="136" y1="194" x2="126" y2="242" />
+        </g>
+
+        <!-- Woven Wicker Basket -->
+        <g id="basket-group">
+          <!-- Basket Rim -->
+          <rect x="91" y="240" width="38" height="5" rx="2" fill="#a06030" stroke="#ffd700" stroke-width="0.8" />
+          <!-- Basket Body -->
+          <path d="M93,245 L96,274 Q96,278 100,278 L120,278 Q124,278 124,274 L127,245 Z" fill="url(#basket-grad)" stroke="#3a1e08" stroke-width="1" />
+          <!-- Wicker Weave Texture Lines -->
+          <line x1="94" y1="254" x2="126" y2="254" stroke="#c48243" stroke-width="0.8" opacity="0.6" />
+          <line x1="95" y1="264" x2="125" y2="264" stroke="#c48243" stroke-width="0.8" opacity="0.6" />
+          <line x1="102" y1="245" x2="103" y2="278" stroke="#3a1e08" stroke-width="0.7" opacity="0.5" />
+          <line x1="110" y1="245" x2="110" y2="278" stroke="#3a1e08" stroke-width="0.7" opacity="0.5" />
+          <line x1="118" y1="245" x2="117" y2="278" stroke="#3a1e08" stroke-width="0.7" opacity="0.5" />
+          <!-- Basket Pennant Flag (Decorative) -->
+          <polygon points="127,250 137,255 127,260" fill="#f6c85f" />
+        </g>
+      </svg>
+    </div>
+
+    <!-- Floating Thought Bubbles / Cards Layer -->
+    <div id="thoughts-layer"></div>
+
+    <!-- UI Overlay / HUD -->
+    <div id="ui-overlay">
+      <!-- Top Left: Altitude Progress Tracker -->
+      <div class="altitude-dashboard">
+        <div class="altitude-stage-label">
+          <span id="altitude-realm">Earth Horizon</span>
+          <span id="altitude-percent">0%</span>
+        </div>
+        <div class="altitude-value" id="altitude-meters">150 m</div>
+        <div class="altitude-track">
+          <div class="altitude-fill" id="altitude-fill"></div>
+        </div>
+        <div class="altitude-checkpoints">
+          <span>Ground</span>
+          <span>Hills</span>
+          <span>Clouds</span>
+          <span>Stars</span>
+          <span>Zenith</span>
+        </div>
+      </div>
+
+      <!-- Top Right: Audio Mute & Direct Meaning Button -->
+      <div class="top-controls">
+        <button id="direct-meaning-btn" class="glass-btn" title="Watch Meaning Animation" style="width: auto; border-radius: 20px; padding: 0 16px; font-size: 0.85rem; font-weight: 600; gap: 6px; background: linear-gradient(135deg, rgba(246, 200, 95, 0.35), rgba(56, 239, 213, 0.3)); border: 1px solid rgba(246, 200, 95, 0.8); color: #ffd700; cursor: pointer; box-shadow: 0 0 20px rgba(246, 200, 95, 0.4);">
+          <span>▶ Watch Meaning</span>
+        </button>
+        <button id="audio-toggle" class="glass-btn" title="Toggle Sound Atmosphere" aria-label="Toggle Sound">
+          <span id="audio-icon">🔇</span>
+        </button>
+      </div>
+
+      <!-- Center Top: Philosophical Header & Prompt -->
+      <div class="header-zone" id="header-prompt">
+        <h1 class="main-prompt-title">What makes you rise?</h1>
+        <div class="prompt-subtext">
+          <span>✦ Drag or tap thoughts toward the balloon ✦</span>
+        </div>
+      </div>
+
+      <!-- Bottom Hint -->
+      <div class="bottom-hint" id="bottom-hint">
+        Every choice shifts your altitude
+      </div>
+    </div>
+
+    <!-- Climax / Zenith Reveal Overlay -->
+    <div id="climax-overlay">
+      <div class="climax-card">
+        <!-- Message 1 -->
+        <div class="climax-prelude">
+          “Your thoughts have weight.<br>
+          <strong>Choose what makes you rise.”</strong>
+        </div>
+
+        <div class="ornate-divider"></div>
+
+        <!-- Thiruvalluvar Sacred Emblem -->
+        <div class="thiruvalluvar-emblem" title="திருவள்ளுவர் (Thiruvalluvar)">
+          <svg class="thiruvalluvar-svg" viewBox="0 0 100 100" fill="none">
+            <!-- Halo Rays -->
+            <circle cx="50" cy="50" r="45" stroke="#f6c85f" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6" />
+            <!-- Silhouette of Thiruvalluvar (Sage with topknot, beard, palm leaf scroll) -->
+            <circle cx="50" cy="32" r="14" fill="#ffd700" />
+            <!-- Topknot hair knot -->
+            <circle cx="50" cy="15" r="6" fill="#ffd700" />
+            <!-- Beard & Robe Silhouette -->
+            <path d="M42,36 Q50,52 58,36 Q64,48 70,72 L30,72 Q36,48 42,36 Z" fill="#ffd700" />
+            <!-- Palm Leaf Scroll (ஓலைச்சுவடி) in hands -->
+            <rect x="34" y="60" width="32" height="7" rx="3.5" fill="#ffffff" stroke="#c48243" stroke-width="1.2" />
+          </svg>
+        </div>
+
+        <!-- Sacred Thirukkural Reveal -->
+        <div class="kural-container">
+          <span class="kural-tag">திருவள்ளுவர் அருளிய திருக்குறள் · அதிகாரம்: ஊக்கமுடைமை</span>
+          <div class="kural-tamil-text">
+            “உள்ளுவது எல்லாம் உயர்வுள்ளல் மற்றது<br>
+            தள்ளினும் தள்ளாமை நீர்த்து.”
+          </div>
+        </div>
+
+        <!-- Meaning -->
+        <div class="kural-meaning">
+          “Think high and aim high. Even if you don't reach the highest goal, the effort itself will take you higher.”
+        </div>
+
+        <!-- Action: Watch Meaning Animation -->
+        <div class="kural-actions-row">
+          <button id="look-beyond-words-btn" class="look-beyond-btn" style="font-size: 1.1rem; padding: 16px 44px; background: linear-gradient(135deg, #f6c85f, #38efd5); color: #0b1021; font-weight: 700; box-shadow: 0 0 45px rgba(246, 200, 95, 0.8), 0 5px 25px rgba(0,0,0,0.5); border: none; cursor: pointer; border-radius: 40px; display: inline-flex; align-items: center; gap: 12px; margin: 6px auto;">
+            <span>Watch Meaning Animation</span>
+            <span style="font-size: 1.25rem;">▶</span>
+          </button>
+        </div>
+        <div style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.75); margin-top: 8px; letter-spacing: 1.5px;">
+          ✦ Animated demonstration beginning automatically ✦
+        </div>
+
+        <!-- Autoplay Countdown Bar -->
+        <div class="kural-autoplay-bar">
+          <div id="kural-autoplay-fill" class="kural-autoplay-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================
+         POST-KURAL CINEMATIC EXPERIENCE CONTAINER
+         ========================================= -->
+    <div id="cinematic-experience-container">
+      <canvas id="cinematic-canvas"></canvas>
+
+      <!-- Stage 0: The Tale of Two Heights (Animated Meaning Demonstration) -->
+      <div id="cine-stage-two-heights" class="cine-stage">
+        <div class="cine-title" style="margin-bottom: 4px;">The Parable of Two Heights</div>
+        <div class="cine-subtitle" style="margin-bottom: 10px; font-size: 1rem;">
+          Watch the Kural's meaning in action: What happens when two lives aim differently?
+        </div>
+
+        <div id="two-heights-stage">
+          <!-- Left Column: Aiming Low -->
+          <div class="flight-column" id="flight-col-left">
+            <div class="flight-altitude-track"></div>
+            <!-- Target Beacon: Low Tree -->
+            <div class="flight-target-beacon" style="bottom: 70px;">
+              <span>🌲 Target: 100m</span>
+            </div>
+            <!-- Balloon A -->
+            <div class="flight-balloon-avatar" id="balloon-aim-low">
+              <span style="font-size: 2.2rem; opacity: 0.85;">🎈</span>
+              <div class="flight-tag tag-low">AIM: LOW TREE</div>
+              <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 3px;" id="alt-readout-low">0m</div>
+            </div>
+          </div>
+
+          <!-- Right Column: Aiming For The Stars -->
+          <div class="flight-column" id="flight-col-right">
+            <div class="flight-altitude-track"></div>
+            <!-- Target Beacon: Cosmic Star -->
+            <div class="flight-target-beacon" style="bottom: 270px;">
+              <span>⭐ Target: 10,000m</span>
+            </div>
+            <!-- Balloon B -->
+            <div class="flight-balloon-avatar" id="balloon-aim-high">
+              <span style="font-size: 2.8rem; filter: drop-shadow(0 0 20px #f6c85f);">🎈</span>
+              <div class="flight-tag tag-high">AIM: CELESTIAL STAR</div>
+              <div style="font-size: 0.8rem; color: #ffd700; margin-top: 3px; font-weight: 700;" id="alt-readout-high">0m</div>
+            </div>
+          </div>
+
+          <!-- Bottom Verdict -->
+          <div class="two-heights-verdict" id="two-heights-verdict">
+            Observing the flights...
+          </div>
+        </div>
+
+        <button id="two-heights-next-btn" class="cine-btn primary" style="margin-top: 10px;">
+          <span>Explore The Constellation of Growth</span>
+          <span>➔</span>
+        </button>
+      </div>
+
+      <!-- Stage 1: Silent Transition -->
+      <div id="cine-stage-1" class="cine-stage">
+        <div class="cine-title">“Now… look beyond the words.”</div>
+        <div class="cine-subtitle">Float higher. Watch the perspective change.</div>
+      </div>
+
+      <!-- Stage 2: LOOK DOWN Experience -->
+      <div id="cine-stage-2" class="cine-stage">
+        <button id="look-down-btn" class="look-down-btn">
+          <span>LOOK DOWN</span>
+          <span>↓</span>
+        </button>
+
+        <div id="macro-viewport" style="display: none;">
+          <div class="macro-altitude-line"></div>
+          <div class="macro-balloon-mini">
+            <span class="macro-balloon-icon">🎈</span>
+            <span class="macro-balloon-label">YOU ARE HERE</span>
+          </div>
+          <div class="macro-origin-dot">
+            <div class="origin-beacon"></div>
+            <div class="origin-label">This is where you began</div>
+          </div>
+        </div>
+
+        <div id="macro-caption" class="cine-title" style="display: none; margin-top: 14px;">
+          “This is where you began.”
+        </div>
+        <div id="macro-subcaption" class="cine-subtitle" style="display: none;">
+          Look at the vast distance between where you started and where you stand now.
+        </div>
+      </div>
+
+      <!-- Stage 3: The Unreached Highest Goal -->
+      <div id="cine-stage-3" class="cine-stage">
+        <div class="giant-star-container">
+          <div class="giant-star-symbol">
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
+              <polygon points="50,5 64,36 98,36 70,57 81,91 50,70 19,91 30,57 2,36 36,36" fill="#ffd700" />
+            </svg>
+          </div>
+          <div class="giant-star-label">THE HIGHEST GOAL</div>
+        </div>
+
+        <div class="balloon-under-star">
+          <span style="font-size: 2.8rem; filter: drop-shadow(0 0 20px #f6c85f);">🎈</span>
+        </div>
+
+        <div id="goal-message-1" class="cine-title" style="margin-top: 25px;">
+          “You didn't reach the highest point.”
+        </div>
+        <div id="goal-message-2" class="cine-title" style="display: none; color: var(--color-gold); margin-top: 10px;">
+          “But you didn't stay where you started.”
+        </div>
+      </div>
+
+      <!-- Stage 4: Journey Constellation -->
+      <div id="cine-stage-4" class="cine-stage">
+        <div class="cine-title" style="margin-bottom: 6px;">The Journey Transforms into a Constellation</div>
+        <div id="constellation-viewport">
+          <svg id="constellation-svg" class="constellation-svg" viewBox="0 0 800 360"></svg>
+        </div>
+        <div class="transformation-badge-row">
+          <div class="trans-badge badge-failure" id="badge-failure">FAILURE</div>
+          <span class="trans-arrow">➔</span>
+          <div class="trans-badge badge-learning" id="badge-learning">LEARNING</div>
+          <span class="trans-arrow">➔</span>
+          <div class="trans-badge badge-growth" id="badge-growth">GROWTH</div>
+        </div>
+        <div class="cine-subtitle" style="margin-top: 15px;">
+          Even when the highest goal isn't reached, every step creates enduring growth.
+        </div>
+      </div>
+
+      <!-- Stage 5: Creative Step-by-Step Meaning Reveal -->
+      <div id="cine-stage-5" class="cine-stage">
+        <div id="meaning-steps-box">
+          <!-- Step 1: Think Higher -->
+          <div class="meaning-step-card" id="meaning-step-1">
+            <div class="horizon-expand-ring"></div>
+            <div class="cine-title">“Think higher.”</div>
+            <div class="cine-subtitle">A small world expands into an infinite horizon.</div>
+          </div>
+          <!-- Step 2: Dream Higher -->
+          <div class="meaning-step-card" id="meaning-step-2">
+            <div style="font-size: 3rem; margin-bottom: 10px;">✨ 🌌 ✨</div>
+            <div class="cine-title">“Dream higher.”</div>
+            <div class="cine-subtitle">New stars and possibilities awaken across the cosmos.</div>
+          </div>
+          <!-- Step 3: Work Towards It -->
+          <div class="meaning-step-card" id="meaning-step-3">
+            <div style="font-size: 3rem; margin-bottom: 10px;">⚡ ✦ ⚡</div>
+            <div class="cine-title">“Work towards it.”</div>
+            <div class="cine-subtitle">The path ignites with pure golden momentum.</div>
+          </div>
+          <!-- Step 4: Even If You Fall Short -->
+          <div class="meaning-step-card" id="meaning-step-4">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🌫️ 🎈 🌫️</div>
+            <div class="cine-title" style="color: #cbd5e1;">“Even if you fall short…”</div>
+            <div class="cine-subtitle">The winds falter for a moment.</div>
+          </div>
+          <!-- Step 5: You Are Still Farther -->
+          <div class="meaning-step-card" id="meaning-step-5">
+            <div style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 0 25px #ffd700);">🌟 🎈 🌟</div>
+            <div class="cine-title" style="color: var(--color-gold);">“…you are still farther than where you began.”</div>
+            <div class="cine-subtitle">The effort itself has permanently elevated you.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 6: Interactive Split Screen Comparison -->
+      <div id="cine-stage-6" class="cine-stage">
+        <div class="cine-title" style="margin-bottom: 6px;">Compare The Two Realities</div>
+        <div class="cine-subtitle" style="margin-bottom: 10px; font-size: 0.95rem;">
+          Drag the center slider to feel the difference
+        </div>
+        <div id="split-screen-wrapper">
+          <!-- Left: Smaller Thought -->
+          <div class="split-panel panel-smaller" id="split-left">
+            <div class="split-badge">✦ SMALLER THOUGHT</div>
+            <div class="split-graphic">
+              <div class="smaller-ceiling-line"></div>
+              <div class="smaller-balloon-icon">🎈</div>
+              <div style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">Low Horizon · Limited Flight</div>
+            </div>
+            <div style="font-size: 0.75rem; color: #64748b; text-align: left;">Low Ambition = Stagnant Altitude</div>
+          </div>
+          <!-- Right: Higher Thought -->
+          <div class="split-panel panel-higher" id="split-right">
+            <div class="split-badge">✦ HIGHER THOUGHT</div>
+            <div class="split-graphic">
+              <div class="higher-balloon-icon">🎈</div>
+              <div style="font-size: 0.85rem; color: #ffd700; margin-top: 15px; font-weight: 600;">Boundless Cosmos · Celestial Ascent</div>
+            </div>
+            <div style="font-size: 0.75rem; color: #f6c85f; text-align: right;">Aiming High = Permanent Elevation</div>
+          </div>
+          <!-- Draggable Divider -->
+          <div id="split-handle-bar">
+            <div id="split-handle-circle">⟷</div>
+          </div>
+        </div>
+        <div class="split-narrative" id="split-narrative-text">
+          “Your thoughts don't just change your destination.”
+        </div>
+        <button id="split-next-btn" class="cine-btn primary" style="margin-top: 14px;">
+          <span>Continue the Journey</span>
+          <span>➔</span>
+        </button>
+      </div>
+
+      <!-- Stage 7: Final Cosmic Climax -->
+      <div id="cine-stage-7" class="cine-stage">
+        <div class="final-path-display">
+          <span class="path-step">START</span><span class="path-arrow">➔</span>
+          <span class="path-step">THOUGHT</span><span class="path-arrow">➔</span>
+          <span class="path-step">DREAM</span><span class="path-arrow">➔</span>
+          <span class="path-step">EFFORT</span><span class="path-arrow">➔</span>
+          <span class="path-step">FAILURE</span><span class="path-arrow">➔</span>
+          <span class="path-step">LEARNING</span><span class="path-arrow">➔</span>
+          <span class="path-step highlight">RISE</span>
+        </div>
+        <div id="final-msg-1" class="cine-subtitle" style="font-size: 1.35rem; margin-bottom: 10px;">
+          “You may not reach every goal you imagined.”
+        </div>
+        <div id="final-msg-2" class="cine-subtitle" style="font-size: 1.35rem; color: #f6c85f; margin-bottom: 14px;">
+          “But a higher thought can take you farther than a smaller one ever could.”
+        </div>
+        <div id="final-msg-3" class="final-monumental-quote">
+          “The height of your life begins with the height of your thoughts.”
+        </div>
+        <div class="cine-actions">
+          <button id="cine-restart-btn" class="cine-btn secondary">
+            <span>Replay Visual Story</span>
+            <span>↺</span>
+          </button>
+          <button id="cine-fly-again-btn" class="cine-btn primary">
+            <span>Soar Again from Ground</span>
+            <span>▲</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       THIRUKKURAL EXPERIENCE SCRIPT
+       Vanilla JavaScript - Responsive Canvas, Physics, Particles & Audio Engine
+       ========================================================================== */
+
+    (function() {
+      'use strict';
+
+      // --- CONFIGURATION & GAME STATE ---
+      const STATE = {
+        altitude: 0.05,       // Ranges from 0.0 to 1.0 (Zenith)
+        targetAltitude: 0.05,
+        balloonX: window.innerWidth / 2,
+        balloonY: window.innerHeight * 0.72,
+        balloonVelocityY: 0,
+        bobTimer: 0,
+        isZenithReached: false,
+        soundEnabled: false,
+        mousePos: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+      };
+
+      // Thought definitions
+      const THOUGHT_TEMPLATES = [
+        // Positive Thoughts
+        { id: 'ambition', label: 'AMBITION', type: 'positive', delta: 0.16, icon: '🔥', weight: 'uplifting' },
+        { id: 'effort', label: 'EFFORT', type: 'positive', delta: 0.15, icon: '⚡', weight: 'uplifting' },
+        { id: 'courage', label: 'COURAGE', type: 'positive', delta: 0.14, icon: '🦁', weight: 'uplifting' },
+        { id: 'dream', label: 'DREAM', type: 'positive', delta: 0.14, icon: '✨', weight: 'uplifting' },
+        { id: 'learning', label: 'LEARNING', type: 'positive', delta: 0.13, icon: '🌱', weight: 'uplifting' },
+        // Negative Thoughts
+        { id: 'fear', label: 'FEAR', type: 'negative', delta: -0.10, icon: '🌪️', weight: 'heavy' },
+        { id: 'doubt', label: 'DOUBT', type: 'negative', delta: -0.09, icon: '🌫️', weight: 'heavy' }
+      ];
+
+      // Altitude Realm Boundaries & Titles
+      const REALMS = [
+        { threshold: 0.0, name: 'Earth Meadows', meterBase: 120, maxMeters: 1200 },
+        { threshold: 0.22, name: 'Misty Highland Peaks', meterBase: 1200, maxMeters: 3500 },
+        { threshold: 0.48, name: 'Cloud Kingdom', meterBase: 3500, maxMeters: 7200 },
+        { threshold: 0.74, name: 'Starlit Aurora', meterBase: 7200, maxMeters: 14000 },
+        { threshold: 0.95, name: 'The Golden Zenith', meterBase: 14000, maxMeters: 25000 }
+      ];
+
+      // Color Palettes for Sky Transitions
+      const SKY_PALETTES = [
+        // 0. Ground Dawn (Warm amber, rose, pale lilac, morning glow)
+        { top: [18, 28, 55], mid: [82, 58, 90], bot: [235, 150, 100] },
+        // 1. Highland Mist (Misty indigo, twilight magenta, soft slate)
+        { top: [15, 20, 48], mid: [64, 45, 85], bot: [170, 110, 130] },
+        // 2. Cloud Realm (Deep amethyst, radiant rose-gold, silver lining)
+        { top: [12, 16, 40], mid: [45, 30, 75], bot: [120, 80, 140] },
+        // 3. Cosmic Aurora (Deep abyss blue, emerald & cyan ribbons, violet)
+        { top: [5, 7, 24], mid: [10, 22, 45], bot: [20, 40, 70] },
+        // 4. Zenith / Transcendence (Incandescent gold, stardust amber, celestial radiance)
+        { top: [18, 14, 38], mid: [85, 45, 70], bot: [246, 195, 95] }
+      ];
+
+      // DOM Elements
+      const canvas = document.getElementById('sky-canvas');
+      const ctx = canvas.getContext('2d');
+      const balloonRig = document.getElementById('balloon-rig');
+      const burnerFlame = document.getElementById('burner-flame');
+      const groundLayer = document.getElementById('ground-layer');
+      const thoughtsLayer = document.getElementById('thoughts-layer');
+      const altitudeFill = document.getElementById('altitude-fill');
+      const altitudeMeters = document.getElementById('altitude-meters');
+      const altitudeRealm = document.getElementById('altitude-realm');
+      const altitudePercent = document.getElementById('altitude-percent');
+      const audioToggle = document.getElementById('audio-toggle');
+      const audioIcon = document.getElementById('audio-icon');
+      const climaxOverlay = document.getElementById('climax-overlay');
+      const riseAgainBtn = document.getElementById('rise-again-btn');
+      const headerPrompt = document.getElementById('header-prompt');
+
+      // --- PROCEDURAL AUDIO SYNTHESIZER (Pure Web Audio API) ---
+      let audioCtx = null;
+      let windGain = null;
+
+      function initAudio() {
+        if (audioCtx) return;
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+
+          // Ambient Wind Filtered Noise Generator
+          const bufferSize = audioCtx.sampleRate * 2;
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+          }
+
+          const whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          whiteNoise.loop = true;
+
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(320, audioCtx.currentTime);
+          filter.Q.setValueAtTime(3.0, audioCtx.currentTime);
+
+          windGain = audioCtx.createGain();
+          windGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+
+          whiteNoise.connect(filter);
+          filter.connect(windGain);
+          windGain.connect(audioCtx.destination);
+          whiteNoise.start(0);
+
+          STATE.soundEnabled = true;
+          audioIcon.textContent = '🔊';
+        } catch (e) {
+          console.warn('Web Audio not supported or blocked:', e);
+        }
+      }
+
+      function toggleAudio() {
+        if (!audioCtx) {
+          initAudio();
+          return;
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+          STATE.soundEnabled = true;
+          audioIcon.textContent = '🔊';
+        } else if (STATE.soundEnabled) {
+          if (windGain) windGain.gain.setValueAtTime(0, audioCtx.currentTime);
+          STATE.soundEnabled = false;
+          audioIcon.textContent = '🔇';
+        } else {
+          if (windGain) windGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          STATE.soundEnabled = true;
+          audioIcon.textContent = '🔊';
+        }
+      }
+
+      audioToggle.addEventListener('click', toggleAudio);
+
+      // Auto-unlock audio on any first user click/touch
+      window.addEventListener('pointerdown', () => {
+        if (!audioCtx) initAudio();
+        else if (audioCtx.state === 'suspended') audioCtx.resume();
+      }, { once: true });
+
+      // Play Sound Effects
+      function playBurnerWoosh() {
+        if (!STATE.soundEnabled || !audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.3);
+          osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.65);
+
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.65);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.65);
+        } catch(e) {}
+      }
+
+      function playChime(positive = true) {
+        if (!STATE.soundEnabled || !audioCtx) return;
+        try {
+          if (positive) {
+            // Ascending pentatonic chime
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.06);
+
+              gain.gain.setValueAtTime(0.12, audioCtx.currentTime + idx * 0.06);
+              gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + idx * 0.06 + 0.8);
+
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(audioCtx.currentTime + idx * 0.06);
+              osc.stop(audioCtx.currentTime + idx * 0.06 + 0.85);
+            });
+          } else {
+            // Low heavy descending thud
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime + 0.4);
+
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.45);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.45);
+          }
+        } catch(e) {}
+      }
+
+      function playZenithChord() {
+        if (!STATE.soundEnabled || !audioCtx) return;
+        try {
+          // Lush Celestial Major 9th chord
+          const chord = [261.63, 392.00, 523.25, 659.25, 783.99, 987.77, 1174.66];
+          chord.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.08);
+
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i * 0.08 + 3.5);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + i * 0.08);
+            osc.stop(audioCtx.currentTime + i * 0.08 + 3.6);
+          });
+        } catch(e) {}
+      }
+
+      // --- CANVAS RESIZING & PARTICLES SYSTEM ---
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.scale(dpr, dpr);
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      // Procedural Background Elements: Stars, Clouds, Auroras & Embers
+      const STARS = [];
+      for (let i = 0; i < 160; i++) {
+        STARS.push({
+          x: Math.random(),
+          y: Math.random(),
+          size: Math.random() * 2 + 0.6,
+          twinkleSpeed: Math.random() * 0.03 + 0.01,
+          phase: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.3 ? '#ffffff' : (Math.random() > 0.5 ? '#ffe39f' : '#b6e3ff')
+        });
+      }
+
+      // Volumetric Cloud Puffs
+      const CLOUDS = [];
+      for (let i = 0; i < 14; i++) {
+        CLOUDS.push({
+          x: Math.random() * width,
+          y: Math.random() * (height * 1.5) - height * 0.2,
+          radius: Math.random() * 80 + 50,
+          speed: Math.random() * 0.3 + 0.1,
+          opacity: Math.random() * 0.35 + 0.15,
+          verticalLayer: Math.random() // altitude affinity (0.35 - 0.75)
+        });
+      }
+
+      // Dynamic Particles (Embers, Sparkles, Smoke)
+      const PARTICLES = [];
+
+      function spawnParticles(x, y, count, type) {
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * (type === 'zenith' ? 6 : 4) + 1;
+          PARTICLES.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - (type === 'ember' ? 2 : 0),
+            size: Math.random() * (type === 'smoke' ? 14 : 4) + 2,
+            life: 1.0,
+            decay: Math.random() * 0.02 + (type === 'zenith' ? 0.008 : 0.02),
+            type: type, // 'ember', 'sparkle', 'smoke', 'zenith'
+            color: type === 'smoke' 
+              ? `rgba(${Math.floor(80 + Math.random()*40)}, ${Math.floor(90 + Math.random()*40)}, 110, ` 
+              : (type === 'zenith' 
+                  ? `rgba(255, ${Math.floor(210 + Math.random()*45)}, ${Math.floor(100 + Math.random()*155)}, `
+                  : `rgba(255, ${Math.floor(180 + Math.random()*70)}, 80, `)
+          });
+        }
+      }
+
+      // --- SKY COLOR INTERPOLATION ---
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function lerpColor(c1, c2, t) {
+        return [
+          Math.round(lerp(c1[0], c2[0], t)),
+          Math.round(lerp(c1[1], c2[1], t)),
+          Math.round(lerp(c1[2], c2[2], t))
+        ];
+      }
+
+      function getSkyGradient(alt) {
+        // Clamp altitude
+        const clamped = Math.max(0, Math.min(1, alt));
+        const segmentCount = SKY_PALETTES.length - 1;
+        const segment = Math.min(Math.floor(clamped * segmentCount), segmentCount - 1);
+        const t = (clamped - segment / segmentCount) * segmentCount;
+
+        const p1 = SKY_PALETTES[segment];
+        const p2 = SKY_PALETTES[segment + 1];
+
+        const top = lerpColor(p1.top, p2.top, t);
+        const mid = lerpColor(p1.mid, p2.mid, t);
+        const bot = lerpColor(p1.bot, p2.bot, t);
+
+        return {
+          top: `rgb(${top.join(',')})`,
+          mid: `rgb(${mid.join(',')})`,
+          bot: `rgb(${bot.join(',')})`
+        };
+      }
+
+      // --- THOUGHT BUBBLES SPAWN & INTERACTION ---
+      const activeThoughts = [];
+      let draggedThought = null;
+      let dragOffset = { x: 0, y: 0 };
+
+      function createThoughtElement(data, initialX, initialY) {
+        const card = document.createElement('div');
+        card.className = `thought-card ${data.type}`;
+        card.dataset.id = data.id;
+        card.dataset.type = data.label;
+        card.dataset.delta = data.delta;
+        
+        card.innerHTML = `
+          <span class="thought-icon">${data.icon}</span>
+          <span class="thought-label">${data.label}</span>
+        `;
+
+        // Position & Float physics properties
+        card.style.left = `${initialX}px`;
+        card.style.top = `${initialY}px`;
+
+        const thoughtObj = {
+          el: card,
+          data: data,
+          x: initialX,
+          y: initialY,
+          originX: initialX,
+          originY: initialY,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          floatPhase: Math.random() * Math.PI * 2,
+          floatSpeed: Math.random() * 0.03 + 0.015,
+          isDragging: false,
+          isAbsorbing: false
+        };
+
+        // Attach Drag & Click Handlers
+        attachThoughtInteractions(thoughtObj);
+        thoughtsLayer.appendChild(card);
+        activeThoughts.push(thoughtObj);
+      }
+
+      function attachThoughtInteractions(tObj) {
+        const el = tObj.el;
+
+        // Pointer down (Mouse or Touch)
+        el.addEventListener('pointerdown', (e) => {
+          if (tObj.isAbsorbing || STATE.isZenithReached) return;
+          initAudio(); // Initialize audio on first click/touch interaction
+          
+          draggedThought = tObj;
+          tObj.isDragging = true;
+          tObj.dragStartX = e.clientX;
+          tObj.dragStartY = e.clientY;
+          tObj.hasMoved = false;
+
+          const rect = el.getBoundingClientRect();
+          dragOffset.x = e.clientX - rect.left;
+          dragOffset.y = e.clientY - rect.top;
+
+          el.classList.add('dragging');
+          el.setPointerCapture(e.pointerId);
+          e.stopPropagation();
+        });
+
+        el.addEventListener('pointermove', (e) => {
+          if (tObj.isDragging) {
+            const dist = Math.hypot(e.clientX - tObj.dragStartX, e.clientY - tObj.dragStartY);
+            if (dist > 6) tObj.hasMoved = true;
+
+            tObj.x = e.clientX - dragOffset.x;
+            tObj.y = e.clientY - dragOffset.y;
+            el.style.left = `${tObj.x}px`;
+            el.style.top = `${tObj.y}px`;
+
+            // Check proximity to balloon for magnetic suction hint
+            checkBalloonProximity(tObj);
+          }
+        });
+
+        el.addEventListener('pointerup', (e) => {
+          if (tObj.isDragging) {
+            tObj.isDragging = false;
+            el.classList.remove('dragging');
+            el.releasePointerCapture(e.pointerId);
+            draggedThought = null;
+
+            // If user clicked without dragging, initiate graceful flight into burner!
+            if (!tObj.hasMoved) {
+              absorbThought(tObj);
+            } else {
+              // Drag release: if near balloon basket/burner, absorb, else release to float
+              const balloonCenter = getBalloonCenter();
+              const dist = Math.hypot(tObj.x + 60 - balloonCenter.x, tObj.y + 20 - balloonCenter.y);
+              if (dist < 180) {
+                absorbThought(tObj);
+              }
+            }
+          }
+        });
+
+        el.addEventListener('pointercancel', () => {
+          if (tObj.isDragging) {
+            tObj.isDragging = false;
+            el.classList.remove('dragging');
+            draggedThought = null;
+          }
+        });
+      }
+
+      function getBalloonCenter() {
+        const rect = balloonRig.getBoundingClientRect();
+        return {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height * 0.65 // Around the burner and basket
+        };
+      }
+
+      function checkBalloonProximity(tObj) {
+        const balloonCenter = getBalloonCenter();
+        const dist = Math.hypot(tObj.x + 60 - balloonCenter.x, tObj.y + 20 - balloonCenter.y);
+        if (dist < 180) {
+          balloonRig.style.filter = tObj.data.type === 'positive'
+            ? 'drop-shadow(0 0 35px rgba(246, 200, 95, 0.75))'
+            : 'drop-shadow(0 0 30px rgba(60, 70, 90, 0.75))';
+        } else {
+          balloonRig.style.filter = '';
+        }
+      }
+
+      // Absorb Thought into the Balloon Burner
+      function absorbThought(tObj) {
+        if (tObj.isAbsorbing) return;
+        tObj.isAbsorbing = true;
+
+        const el = tObj.el;
+        const balloonCenter = getBalloonCenter();
+
+        // Animate card shrinking & flying into burner
+        el.style.left = `${balloonCenter.x - 50}px`;
+        el.style.top = `${balloonCenter.y - 20}px`;
+        el.classList.add('absorbing');
+
+        const isPositive = tObj.data.type === 'positive';
+
+        // Trigger burner effects
+        setTimeout(() => {
+          if (isPositive) {
+            // Flare up the burner flame!
+            burnerFlame.classList.add('firing');
+            playBurnerWoosh();
+            playChime(true);
+            spawnParticles(balloonCenter.x, balloonCenter.y - 20, 35, 'ember');
+            showAltitudePopup(`+ ${tObj.data.label}`, '#f6c85f', balloonCenter.x, balloonCenter.y - 60);
+            
+            setTimeout(() => {
+              burnerFlame.classList.remove('firing');
+            }, 650);
+          } else {
+            // Negative thought drags balloon slightly down, releases dark smoke
+            playChime(false);
+            spawnParticles(balloonCenter.x, balloonCenter.y + 20, 25, 'smoke');
+            showAltitudePopup(`- ${tObj.data.label}`, '#cbd5e0', balloonCenter.x, balloonCenter.y - 20);
+            
+            // Wobble balloon downwards
+            STATE.balloonVelocityY += 4.5;
+          }
+
+          // Apply Altitude Shift
+          applyAltitudeDelta(tObj.data.delta);
+
+          // Remove element from DOM and active array
+          el.remove();
+          const idx = activeThoughts.indexOf(tObj);
+          if (idx !== -1) activeThoughts.splice(idx, 1);
+
+          // Replenish thoughts after a brief moment
+          if (!STATE.isZenithReached) {
+            setTimeout(replenishThoughts, 1200);
+          }
+        }, 320);
+      }
+
+      function showAltitudePopup(text, color, x, y) {
+        const popup = document.createElement('div');
+        popup.className = 'altitude-indicator-popup';
+        popup.style.color = color;
+        popup.style.left = `${x}px`;
+        popup.style.top = `${y}px`;
+        popup.textContent = text;
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 1400);
+      }
+
+      function applyAltitudeDelta(delta) {
+        STATE.targetAltitude = Math.max(0.02, Math.min(1.0, STATE.targetAltitude + delta));
+
+        // Upward/Downward physical kick to balloon position
+        if (delta > 0) {
+          STATE.balloonVelocityY -= delta * 50;
+        } else {
+          STATE.balloonVelocityY -= delta * 30;
+        }
+
+        // Check for Zenith completion!
+        if (STATE.targetAltitude >= 0.85 && !STATE.isZenithReached) {
+          triggerZenithClimax();
+        }
+      }
+
+      // Initial Spawn of Thought Bubbles in Scenic Orbital Positions
+      function spawnInitialThoughts() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        // Position coordinates circling the balloon
+        const positions = [
+          { x: w * 0.16, y: h * 0.35 },
+          { x: w * 0.22, y: h * 0.62 },
+          { x: w * 0.32, y: h * 0.44 },
+          { x: w * 0.68, y: h * 0.38 },
+          { x: w * 0.78, y: h * 0.58 },
+          { x: w * 0.82, y: h * 0.35 },
+          { x: w * 0.28, y: h * 0.22 }
+        ];
+
+        THOUGHT_TEMPLATES.forEach((template, i) => {
+          const pos = positions[i % positions.length];
+          // Slight jitter for organic placement
+          const jx = pos.x + (Math.random() - 0.5) * 40;
+          const jy = pos.y + (Math.random() - 0.5) * 40;
+          createThoughtElement(template, jx, jy);
+        });
+      }
+
+      function replenishThoughts() {
+        if (activeThoughts.length >= 6 || STATE.isZenithReached) return;
+
+        // Select a template prioritizing positive if altitude is low
+        const rand = Math.random();
+        let selectedTemplate;
+        if (rand < 0.75) {
+          const positives = THOUGHT_TEMPLATES.filter(t => t.type === 'positive');
+          selectedTemplate = positives[Math.floor(Math.random() * positives.length)];
+        } else {
+          const negatives = THOUGHT_TEMPLATES.filter(t => t.type === 'negative');
+          selectedTemplate = negatives[Math.floor(Math.random() * negatives.length)];
+        }
+
+        // Spawn smoothly drifting in from left or right edge
+        const fromLeft = Math.random() > 0.5;
+        const spawnX = fromLeft ? -120 : window.innerWidth + 30;
+        const targetX = fromLeft 
+          ? window.innerWidth * (0.12 + Math.random() * 0.25)
+          : window.innerWidth * (0.65 + Math.random() * 0.22);
+        const spawnY = window.innerHeight * (0.25 + Math.random() * 0.45);
+
+        createThoughtElement(selectedTemplate, targetX, spawnY);
+      }
+
+      // --- THE ZENITH CLIMAX TRANSFORMATION ---
+      function triggerZenithClimax() {
+        STATE.isZenithReached = true;
+        STATE.targetAltitude = 1.0;
+        balloonRig.classList.add('zenith-glow');
+
+        // Play transcendent celestial harmony
+        playZenithChord();
+
+        // Burst of glorious stardust particles
+        const center = getBalloonCenter();
+        spawnParticles(center.x, center.y, 120, 'zenith');
+
+        // Fade out header prompt and thoughts
+        headerPrompt.style.opacity = '0';
+        activeThoughts.forEach(t => {
+          t.el.style.transition = 'all 1.5s ease';
+          t.el.style.opacity = '0';
+          t.el.style.transform = 'scale(0.5) translateY(-50px)';
+        });
+
+        // Continuous stardust rain during climax
+        const zenithInterval = setInterval(() => {
+          if (!STATE.isZenithReached) {
+            clearInterval(zenithInterval);
+            return;
+          }
+          spawnParticles(Math.random() * width, Math.random() * height * 0.6, 6, 'zenith');
+        }, 180);
+
+        // Reveal the Climax Modal
+        setTimeout(() => {
+          climaxOverlay.classList.add('active');
+
+          // Animate the countdown bar
+          const autoFill = document.getElementById('kural-autoplay-fill');
+          if (autoFill) {
+            autoFill.style.width = '0%';
+            setTimeout(() => { autoFill.style.width = '100%'; }, 50);
+          }
+
+          // Auto-start animated meaning sequence after user sees the Kural
+          if (window.kuralAutoTimer) clearTimeout(window.kuralAutoTimer);
+          window.kuralAutoTimer = setTimeout(() => {
+            if (climaxOverlay.classList.contains('active')) {
+              startCinematicExperience();
+            }
+          }, 3800);
+        }, 1600);
+      }
+
+      // Look Beyond The Words Button Listener
+      const lookBeyondWordsBtn = document.getElementById('look-beyond-words-btn');
+      if (lookBeyondWordsBtn) {
+        lookBeyondWordsBtn.addEventListener('click', () => {
+          if (window.kuralAutoTimer) clearTimeout(window.kuralAutoTimer);
+          startCinematicExperience();
+        });
+      }
+
+      // Direct Meaning Button in HUD
+      const directMeaningBtn = document.getElementById('direct-meaning-btn');
+      if (directMeaningBtn) {
+        directMeaningBtn.addEventListener('click', () => {
+          initAudio();
+          startCinematicExperience();
+        });
+      }
+
+      // Rise Again / Replay Reset (if present)
+      if (riseAgainBtn) {
+        riseAgainBtn.addEventListener('click', () => {
+          if (window.kuralAutoTimer) clearTimeout(window.kuralAutoTimer);
+          climaxOverlay.classList.remove('active');
+          STATE.isZenithReached = false;
+          balloonRig.classList.remove('zenith-glow');
+          headerPrompt.style.opacity = '1';
+          
+          // Reset altitude smoothly to ground
+          STATE.targetAltitude = 0.05;
+
+          // Clean up thoughts and respawn fresh ones
+          thoughtsLayer.innerHTML = '';
+          activeThoughts.length = 0;
+          setTimeout(spawnInitialThoughts, 600);
+        });
+      }
+
+      // --- MAIN ANIMATION & RENDER LOOP ---
+      let lastTime = performance.now();
+
+      function update(dt) {
+        // Smoothly interpolate altitude toward target altitude
+        STATE.altitude += (STATE.targetAltitude - STATE.altitude) * 0.045;
+
+        // Balloon physical floating & spring dynamics
+        STATE.bobTimer += dt * 0.002;
+        const idleBob = Math.sin(STATE.bobTimer) * 12;
+        const idleSway = Math.cos(STATE.bobTimer * 0.7) * 4;
+
+        // Vertical position of balloon relative to altitude
+        // When altitude is 0%, balloon sits low near bottom.
+        // When altitude increases, balloon rises gracefully towards top third of screen.
+        const baseY = height * lerp(0.72, 0.38, Math.pow(STATE.altitude, 0.75));
+        
+        // Velocity spring damping
+        STATE.balloonVelocityY *= 0.88;
+        const targetY = baseY + idleBob + STATE.balloonVelocityY;
+        STATE.balloonY += (targetY - STATE.balloonY) * 0.12;
+
+        // Horizontal sway towards mouse center
+        const targetX = width * 0.5 + idleSway + (STATE.mousePos.x - width * 0.5) * 0.04;
+        STATE.balloonX += (targetX - STATE.balloonX) * 0.08;
+
+        // Balloon tilt based on lateral velocity and wind
+        const tilt = (targetX - STATE.balloonX) * 0.35 + idleSway * 0.5;
+
+        // Dynamic balloon scale: starts tiny near ground (0.65), expands as it ascends (1.15)
+        const scale = lerp(0.65, 1.15, Math.pow(STATE.altitude, 0.75));
+
+        balloonRig.style.left = `${STATE.balloonX}px`;
+        balloonRig.style.top = `${STATE.balloonY}px`;
+        balloonRig.style.transform = `translate(-50%, -50%) rotate(${tilt}deg) scale(${scale})`;
+
+        // Parallax Ground Layer Motion: sinking out of view as altitude increases
+        const groundOffsetY = STATE.altitude * height * 1.35;
+        const groundOpacity = Math.max(0, 1 - STATE.altitude * 3.8);
+        groundLayer.style.transform = `translateY(${groundOffsetY}px)`;
+        groundLayer.style.opacity = groundOpacity;
+
+        // Update HUD Values
+        updateHUD();
+
+        // Update Thought Cards Floating Physics
+        updateThoughts(dt);
+
+        // Update Dynamic Particles
+        updateParticles();
+      }
+
+      function updateHUD() {
+        const alt = STATE.altitude;
+        const percent = Math.min(100, Math.round(alt * 100));
+        altitudePercent.textContent = `${percent}%`;
+        altitudeFill.style.width = `${Math.max(5, percent)}%`;
+
+        // Calculate Meters and Realm Title
+        let currentRealm = REALMS[0];
+        for (let i = REALMS.length - 1; i >= 0; i--) {
+          if (alt >= REALMS[i].threshold) {
+            currentRealm = REALMS[i];
+            break;
+          }
+        }
+        altitudeRealm.textContent = currentRealm.name;
+
+        // Smooth meter calculation across realms
+        const meters = Math.round(lerp(150, 24800, Math.pow(alt, 1.2)));
+        altitudeMeters.textContent = `${meters.toLocaleString()} m`;
+      }
+
+      function updateThoughts(dt) {
+        const time = performance.now() * 0.0015;
+
+        activeThoughts.forEach((t) => {
+          if (t.isDragging || t.isAbsorbing) return;
+
+          // Gentle orbital floating motion
+          t.floatPhase += t.floatSpeed;
+          const floatOffset = Math.sin(t.floatPhase) * 14;
+          const swayOffset = Math.cos(t.floatPhase * 0.8) * 10;
+
+          // Slight repulsion from the balloon rig so they don't block the artwork
+          const dx = t.x - STATE.balloonX;
+          const dy = t.y - STATE.balloonY;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 130 && dist > 1) {
+            t.x += (dx / dist) * 1.8;
+            t.y += (dy / dist) * 1.8;
+          }
+
+          // Gentle return to origin neighborhood
+          t.x += (t.originX + swayOffset - t.x) * 0.02;
+          t.y += (t.originY + floatOffset - t.y) * 0.02;
+
+          t.el.style.left = `${t.x}px`;
+          t.el.style.top = `${t.y}px`;
+        });
+      }
+
+      function updateParticles() {
+        for (let i = PARTICLES.length - 1; i >= 0; i--) {
+          const p = PARTICLES[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life -= p.decay;
+
+          if (p.type === 'smoke') {
+            p.size += 0.35;
+            p.vx *= 0.96;
+            p.vy *= 0.96;
+          } else if (p.type === 'ember') {
+            p.vy -= 0.08; // upward buoyancy
+            p.vx += (Math.random() - 0.5) * 0.2;
+          }
+
+          if (p.life <= 0) {
+            PARTICLES.splice(i, 1);
+          }
+        }
+      }
+
+      // --- CANVAS RENDERING (SKY, STARS, AURORA, VOLUMETRIC CLOUDS) ---
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Dynamic Atmosphere Sky Gradient
+        const skyColors = getSkyGradient(STATE.altitude);
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
+        skyGrad.addColorStop(0, skyColors.top);
+        skyGrad.addColorStop(0.55, skyColors.mid);
+        skyGrad.addColorStop(1, skyColors.bot);
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // 2. Stars and Constellations (Density grows with Altitude)
+        const starOpacity = Math.max(0, Math.min(1, (STATE.altitude - 0.2) / 0.65));
+        if (starOpacity > 0.01) {
+          ctx.save();
+          STARS.forEach((star) => {
+            star.phase += star.twinkleSpeed;
+            const twinkle = (Math.sin(star.phase) + 1) * 0.5;
+            const alpha = starOpacity * (0.35 + twinkle * 0.65);
+            ctx.fillStyle = star.color;
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.arc(star.x * width, star.y * height, star.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Radiant cross bloom on brighter stars
+            if (star.size > 2.2 && twinkle > 0.8) {
+              ctx.strokeStyle = star.color;
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              ctx.moveTo(star.x * width - 6, star.y * height);
+              ctx.lineTo(star.x * width + 6, star.y * height);
+              ctx.moveTo(star.x * width, star.y * height - 6);
+              ctx.lineTo(star.x * width, star.y * height + 6);
+              ctx.stroke();
+            }
+          });
+          ctx.restore();
+        }
+
+        // 3. Aurora Borealis Ribbon Waves (High Altitude: 0.65 - 1.0)
+        const auroraOpacity = Math.max(0, Math.min(1, (STATE.altitude - 0.55) / 0.4));
+        if (auroraOpacity > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = auroraOpacity * 0.45;
+          const time = performance.now() * 0.0008;
+
+          // Emerald & Cyan Aurora Stream
+          ctx.beginPath();
+          ctx.moveTo(0, height * 0.25);
+          for (let x = 0; x <= width; x += 40) {
+            const wave1 = Math.sin(x * 0.003 + time) * 60;
+            const wave2 = Math.cos(x * 0.006 - time * 0.7) * 35;
+            ctx.lineTo(x, height * 0.25 + wave1 + wave2);
+          }
+          ctx.lineTo(width, 0);
+          ctx.lineTo(0, 0);
+          ctx.closePath();
+
+          const auroraGrad = ctx.createLinearGradient(0, 0, 0, height * 0.45);
+          auroraGrad.addColorStop(0, 'rgba(56, 239, 213, 0)');
+          auroraGrad.addColorStop(0.5, 'rgba(56, 239, 213, 0.45)');
+          auroraGrad.addColorStop(0.85, 'rgba(168, 85, 247, 0.35)');
+          auroraGrad.addColorStop(1, 'rgba(168, 85, 247, 0)');
+          ctx.fillStyle = auroraGrad;
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 4. Volumetric Drifting Clouds (Mid Altitude: 0.25 - 0.85)
+        const cloudGlobalAlpha = Math.max(0, Math.min(1, 1 - Math.abs(STATE.altitude - 0.55) * 2.2));
+        if (cloudGlobalAlpha > 0.02) {
+          ctx.save();
+          CLOUDS.forEach((c) => {
+            c.x += c.speed;
+            if (c.x - c.radius > width) c.x = -c.radius * 2;
+
+            // Parallax vertical offset
+            const cloudY = c.y + (1 - STATE.altitude) * 200;
+
+            const cloudGrad = ctx.createRadialGradient(
+              c.x, cloudY, c.radius * 0.1,
+              c.x, cloudY, c.radius
+            );
+            cloudGrad.addColorStop(0, `rgba(255, 255, 255, ${c.opacity * cloudGlobalAlpha})`);
+            cloudGrad.addColorStop(0.65, `rgba(240, 220, 245, ${c.opacity * 0.5 * cloudGlobalAlpha})`);
+            cloudGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            ctx.fillStyle = cloudGrad;
+            ctx.beginPath();
+            ctx.arc(c.x, cloudY, c.radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          ctx.restore();
+        }
+
+        // 5. Celestial Light Rays at Zenith / Sky Summit (Altitude > 0.82)
+        const rayAlpha = Math.max(0, Math.min(1, (STATE.altitude - 0.82) / 0.18));
+        if (rayAlpha > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = rayAlpha * 0.28;
+          const rayTime = performance.now() * 0.0005;
+          const rayCenter = width * 0.5;
+          for (let r = 0; r < 7; r++) {
+            const angle = -0.55 + r * 0.18 + Math.sin(rayTime + r) * 0.04;
+            ctx.beginPath();
+            ctx.moveTo(rayCenter, -50);
+            ctx.lineTo(rayCenter + Math.sin(angle) * height * 1.5 - 60, height);
+            ctx.lineTo(rayCenter + Math.sin(angle) * height * 1.5 + 60, height);
+            ctx.closePath();
+            const rayGrad = ctx.createLinearGradient(rayCenter, 0, rayCenter + Math.sin(angle) * height, height);
+            rayGrad.addColorStop(0, 'rgba(255, 230, 140, 0.6)');
+            rayGrad.addColorStop(0.6, 'rgba(255, 210, 80, 0.2)');
+            rayGrad.addColorStop(1, 'rgba(255, 200, 50, 0)');
+            ctx.fillStyle = rayGrad;
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // 6. Magnetic Attraction Beam when dragging near balloon
+        if (draggedThought) {
+          const bCenter = getBalloonCenter();
+          const tX = draggedThought.x + 60;
+          const tY = draggedThought.y + 20;
+          const dist = Math.hypot(tX - bCenter.x, tY - bCenter.y);
+
+          if (dist < 280) {
+            const beamAlpha = (1 - dist / 280);
+            ctx.save();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = draggedThought.data.type === 'positive'
+              ? `rgba(246, 200, 95, ${beamAlpha * 0.75})`
+              : `rgba(160, 175, 200, ${beamAlpha * 0.6})`;
+            ctx.setLineDash([6, 6]);
+            ctx.lineDashOffset = -performance.now() * 0.03;
+            ctx.beginPath();
+            ctx.moveTo(tX, tY);
+            ctx.quadraticCurveTo((tX + bCenter.x) / 2, (tY + bCenter.y) / 2 - 20, bCenter.x, bCenter.y - 15);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+
+        // 7. Draw Dynamic Particles
+        if (PARTICLES.length > 0) {
+          ctx.save();
+          PARTICLES.forEach((p) => {
+            ctx.fillStyle = `${p.color}${p.life})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          ctx.restore();
+        }
+      }
+
+      // --- MAIN ENGINE TICK ---
+      function tick(currentTime) {
+        const dt = Math.min(currentTime - lastTime, 64);
+        lastTime = currentTime;
+
+        update(dt);
+        render();
+
+        requestAnimationFrame(tick);
+      }
+
+      // --- USER INPUT TRACKING ---
+      window.addEventListener('pointermove', (e) => {
+        STATE.mousePos.x = e.clientX;
+        STATE.mousePos.y = e.clientY;
+      });
+
+      // =========================================================================
+      // POST-KURAL CINEMATIC CONTROLLER (7 STAGES)
+      // Visual & Interactive Experience After Thirukkural Display
+      // =========================================================================
+
+      const CINE_STATE = {
+        container: document.getElementById('cinematic-experience-container'),
+        canvas: document.getElementById('cinematic-canvas'),
+        ctx: null,
+        currentStage: 0,
+        stars: [],
+        stepTimer: null,
+        sliderPercent: 50,
+        isDraggingSlider: false
+      };
+
+      if (CINE_STATE.canvas) {
+        CINE_STATE.ctx = CINE_STATE.canvas.getContext('2d');
+        function resizeCineCanvas() {
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          CINE_STATE.canvas.width = window.innerWidth * dpr;
+          CINE_STATE.canvas.height = window.innerHeight * dpr;
+          if (CINE_STATE.ctx) CINE_STATE.ctx.scale(dpr, dpr);
+        }
+        window.addEventListener('resize', resizeCineCanvas);
+        resizeCineCanvas();
+
+        // Seed floating cinematic cosmic stars
+        for (let s = 0; s < 120; s++) {
+          CINE_STATE.stars.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            size: Math.random() * 2.2 + 0.5,
+            speedY: Math.random() * 0.4 + 0.1,
+            twinkle: Math.random() * Math.PI * 2,
+            color: Math.random() > 0.4 ? '#ffffff' : (Math.random() > 0.5 ? '#f6c85f' : '#38efd5')
+          });
+        }
+      }
+
+      // --- PROCEDURAL AUDIO GENERATOR FOR CINEMATIC STAGES ---
+      function playCineTone(type) {
+        if (!STATE.soundEnabled || !audioCtx) return;
+        try {
+          const now = audioCtx.currentTime;
+          if (type === 'ethereal') {
+            // Soaring ethereal pad chord
+            [329.63, 440.00, 493.88, 659.25].forEach((freq, idx) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+              gain.gain.setValueAtTime(0.08, now + idx * 0.08);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 2.4);
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(now + idx * 0.08);
+              osc.stop(now + idx * 0.08 + 2.5);
+            });
+          } else if (type === 'macro-drop') {
+            // Low resonant downward octave sweep
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(140, now);
+            osc.frequency.exponentialRampToValueAtTime(45, now + 0.8);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 1.25);
+          } else if (type === 'star-bell') {
+            // Luminous high bell chime
+            [1046.50, 1318.51, 1567.98].forEach((freq, idx) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+              gain.gain.setValueAtTime(0.12, now + idx * 0.05);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.05 + 1.8);
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(now + idx * 0.05);
+              osc.stop(now + idx * 0.05 + 1.9);
+            });
+          } else if (type === 'node') {
+            // Ascending harmonic note
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, now);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.65);
+          } else if (type === 'transform') {
+            // Failure -> Learning resolution chord
+            [392.00, 493.88, 587.33, 783.99].forEach((freq, idx) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+              gain.gain.setValueAtTime(0.14, now + idx * 0.07);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.07 + 2.2);
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(now + idx * 0.07);
+              osc.stop(now + idx * 0.07 + 2.3);
+            });
+          } else if (type === 'slide') {
+            // Soft glissando shimmer
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600 + CINE_STATE.sliderPercent * 6, now);
+            gain.gain.setValueAtTime(0.04, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.28);
+          } else if (type === 'grand-climax') {
+            // Full triumphant celestial cadence
+            [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+              gain.gain.setValueAtTime(0.1, now + idx * 0.09);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.09 + 3.8);
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(now + idx * 0.09);
+              osc.stop(now + idx * 0.09 + 4.0);
+            });
+          }
+        } catch (e) {}
+      }
+
+      // --- MAIN CINEMATIC STAGE CONTROLLER ---
+      function startCinematicExperience() {
+        if (window.kuralAutoTimer) clearTimeout(window.kuralAutoTimer);
+
+        // Smoothly fade and hide Kural modal
+        climaxOverlay.classList.remove('active');
+        climaxOverlay.style.display = 'none';
+
+        // Activate Cinematic Master Container
+        CINE_STATE.container.style.display = 'flex';
+        CINE_STATE.container.style.opacity = '1';
+        CINE_STATE.container.style.pointerEvents = 'auto';
+        CINE_STATE.container.classList.add('active');
+
+        // Begin with Stage 0: The Parable of Two Heights (Animated Meaning Demonstration)
+        goToCineStage(0);
+      }
+
+      function goToCineStage(stageNum) {
+        if (CINE_STATE.stepTimer) clearTimeout(CINE_STATE.stepTimer);
+        CINE_STATE.currentStage = stageNum;
+
+        // Hide all stages
+        const allStages = [
+          document.getElementById('cine-stage-two-heights'),
+          document.getElementById('cine-stage-1'),
+          document.getElementById('cine-stage-2'),
+          document.getElementById('cine-stage-3'),
+          document.getElementById('cine-stage-4'),
+          document.getElementById('cine-stage-5'),
+          document.getElementById('cine-stage-6'),
+          document.getElementById('cine-stage-7')
+        ];
+        allStages.forEach(s => {
+          if (s) {
+            s.classList.remove('current-stage');
+            s.style.display = 'none';
+            s.style.opacity = '0';
+            s.style.pointerEvents = 'none';
+          }
+        });
+
+        // Activate current stage
+        let targetStage = null;
+        if (stageNum === 0 || stageNum === 'two-heights') {
+          targetStage = document.getElementById('cine-stage-two-heights');
+        } else {
+          targetStage = document.getElementById(`cine-stage-${stageNum}`);
+        }
+        if (targetStage) {
+          targetStage.style.display = 'flex';
+          targetStage.style.opacity = '1';
+          targetStage.style.pointerEvents = 'auto';
+          targetStage.classList.add('current-stage');
+        }
+
+        // Stage-specific orchestrations
+        if (stageNum === 0 || stageNum === 'two-heights') {
+          setupStageTwoHeights();
+        } else if (stageNum === 1) {
+          // Stage 1: Silent Transition: "Now… look beyond the words."
+          playCineTone('ethereal');
+          CINE_STATE.stepTimer = setTimeout(() => {
+            goToCineStage(2);
+          }, 3800);
+        } else if (stageNum === 2) {
+          // Stage 2: "LOOK DOWN ↓" Experience
+          setupStage2LookDown();
+        } else if (stageNum === 3) {
+          // Stage 3: The Unreached Highest Goal
+          setupStage3HighestGoal();
+        } else if (stageNum === 4) {
+          // Stage 4: Constellation Transformation
+          setupStage4Constellation();
+        } else if (stageNum === 5) {
+          // Stage 5: Step by Step Meaning Animation
+          setupStage5MeaningSteps();
+        } else if (stageNum === 6) {
+          // Stage 6: Interactive Split Screen Comparison
+          setupStage6SplitScreen();
+        } else if (stageNum === 7) {
+          // Stage 7: Final Cosmic Climax
+          setupStage7FinalClimax();
+        }
+      }
+
+      // --- STAGE 0: THE TALE OF TWO HEIGHTS (ANIMATED PARABLE) ---
+      function setupStageTwoHeights() {
+        playCineTone('ethereal');
+        const balloonLow = document.getElementById('balloon-aim-low');
+        const balloonHigh = document.getElementById('balloon-aim-high');
+        const altLow = document.getElementById('alt-readout-low');
+        const altHigh = document.getElementById('alt-readout-high');
+        const verdict = document.getElementById('two-heights-verdict');
+        const nextBtn = document.getElementById('two-heights-next-btn');
+
+        // Reset positions
+        balloonLow.style.bottom = '20px';
+        balloonHigh.style.bottom = '20px';
+        altLow.textContent = '0m';
+        altHigh.textContent = '0m';
+        verdict.textContent = 'Launching both flights simultaneously from earth meadow...';
+        verdict.style.borderColor = 'rgba(246, 200, 95, 0.4)';
+
+        // Step 1: Launch both balloons
+        setTimeout(() => {
+          playBurnerWoosh();
+          playCineTone('node');
+          // Balloon Low targets 100m (stops at bottom: 70px)
+          balloonLow.style.bottom = '70px';
+          let lowM = 0;
+          const lowTimer = setInterval(() => {
+            lowM += 5;
+            if (lowM >= 100) {
+              lowM = 100;
+              clearInterval(lowTimer);
+              altLow.textContent = '100m (Goal Reached 100%)';
+            } else {
+              altLow.textContent = `${lowM}m`;
+            }
+          }, 60);
+
+          // Balloon High strives for 10,000m (rises past 100m to 7,500m / bottom: 230px)
+          balloonHigh.style.bottom = '230px';
+          let highM = 0;
+          const highTimer = setInterval(() => {
+            highM += 180;
+            if (highM >= 7500) {
+              highM = 7500;
+              clearInterval(highTimer);
+              altHigh.textContent = '7,500m (Striving toward Star)';
+              playCineTone('star-bell');
+            } else {
+              altHigh.textContent = `${highM}m`;
+            }
+          }, 50);
+        }, 600);
+
+        // Step 2: The Revelation Verdict
+        setTimeout(() => {
+          playCineTone('transform');
+          verdict.innerHTML = `
+            <strong>The Living Meaning of Thirukkural:</strong><br>
+            The low balloon achieved 100% of its small goal (100m), yet stays near the mud.<br>
+            The star-seeker fell short of the infinite star, yet stands at <strong>7,500m</strong> in celestial light!<br>
+            <span style="color: #ffd700; font-size: 1.05em;">“தள்ளினும் தள்ளாமை நீர்த்து” — Even when falling short, the elevation achieved is immense.</span>
+          `;
+          verdict.style.borderColor = '#ffd700';
+          verdict.style.boxShadow = '0 0 35px rgba(246, 200, 95, 0.6)';
+        }, 3400);
+
+        // Button listener to advance
+        nextBtn.onclick = function() {
+          goToCineStage(1);
+        };
+
+        // Auto-advance after 8.5 seconds
+        CINE_STATE.stepTimer = setTimeout(() => {
+          goToCineStage(1);
+        }, 8500);
+      }
+
+      // --- STAGE 2: LOOK DOWN CONTROLLER ---
+      function setupStage2LookDown() {
+        const lookDownBtn = document.getElementById('look-down-btn');
+        const macroViewport = document.getElementById('macro-viewport');
+        const macroCaption = document.getElementById('macro-caption');
+        const macroSubcaption = document.getElementById('macro-subcaption');
+
+        lookDownBtn.style.display = 'inline-flex';
+        macroViewport.style.display = 'none';
+        macroCaption.style.display = 'none';
+        macroSubcaption.style.display = 'none';
+
+        lookDownBtn.onclick = function() {
+          lookDownBtn.style.display = 'none';
+          playCineTone('macro-drop');
+
+          macroViewport.style.display = 'block';
+          macroCaption.style.display = 'block';
+          macroSubcaption.style.display = 'block';
+
+          // Trigger subtle camera shake & zoom-out reveal
+          macroViewport.style.opacity = '0';
+          macroViewport.style.transform = 'scale(0.85)';
+          setTimeout(() => {
+            macroViewport.style.transition = 'all 1.4s cubic-bezier(0.16, 1, 0.3, 1)';
+            macroViewport.style.opacity = '1';
+            macroViewport.style.transform = 'scale(1)';
+          }, 50);
+
+          // Advance to Stage 3 after user absorbs macro perspective
+          CINE_STATE.stepTimer = setTimeout(() => {
+            goToCineStage(3);
+          }, 4600);
+        };
+      }
+
+      // --- STAGE 3: THE HIGHEST GOAL CONTROLLER ---
+      function setupStage3HighestGoal() {
+        playCineTone('star-bell');
+        const msg1 = document.getElementById('goal-message-1');
+        const msg2 = document.getElementById('goal-message-2');
+        msg1.style.display = 'block';
+        msg2.style.display = 'none';
+
+        // Pause for moment, then animate balloon upward slightly and reveal message 2
+        CINE_STATE.stepTimer = setTimeout(() => {
+          playBurnerWoosh();
+          playChime(true);
+          msg2.style.display = 'block';
+          msg2.style.opacity = '0';
+          msg2.style.transform = 'translateY(15px)';
+          setTimeout(() => {
+            msg2.style.transition = 'all 0.9s ease';
+            msg2.style.opacity = '1';
+            msg2.style.transform = 'translateY(0)';
+          }, 50);
+
+          // Advance to Stage 4
+          CINE_STATE.stepTimer = setTimeout(() => {
+            goToCineStage(4);
+          }, 4200);
+        }, 2600);
+      }
+
+      // --- STAGE 4: CONSTELLATION BUILDER & FAILURE->LEARNING TRANSFORMATION ---
+      function setupStage4Constellation() {
+        const svg = document.getElementById('constellation-svg');
+        svg.innerHTML = '';
+
+        const nodes = [
+          { name: 'THOUGHT', x: 80, y: 280, color: '#f6c85f' },
+          { name: 'DREAM', x: 210, y: 220, color: '#c084fc' },
+          { name: 'EFFORT', x: 350, y: 150, color: '#fb923c' },
+          { name: 'FAILURE', x: 470, y: 210, color: '#f87171' },
+          { name: 'LEARNING', x: 590, y: 120, color: '#38efd5' },
+          { name: 'RISE', x: 720, y: 60, color: '#ffd700' }
+        ];
+
+        // Defs for filters
+        svg.innerHTML = `
+          <defs>
+            <filter id="constel-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+        `;
+
+        // Draw connecting polyline
+        const pointsStr = nodes.map(n => `${n.x},${n.y}`).join(' ');
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        poly.setAttribute('points', pointsStr);
+        poly.setAttribute('fill', 'none');
+        poly.setAttribute('stroke', 'rgba(255, 215, 120, 0.7)');
+        poly.setAttribute('stroke-width', '3');
+        poly.setAttribute('stroke-dasharray', '1200');
+        poly.setAttribute('stroke-dashoffset', '1200');
+        poly.setAttribute('filter', 'url(#constel-glow)');
+        poly.style.transition = 'stroke-dashoffset 2.8s cubic-bezier(0.16, 1, 0.3, 1)';
+        svg.appendChild(poly);
+
+        // Nodes group
+        const nodeElements = [];
+        nodes.forEach((n, idx) => {
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('class', 'constellation-node');
+          g.setAttribute('opacity', '0');
+          g.style.transition = 'opacity 0.6s ease';
+
+          // Outer aura circle
+          const aura = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          aura.setAttribute('cx', n.x);
+          aura.setAttribute('cy', n.y);
+          aura.setAttribute('r', '14');
+          aura.setAttribute('fill', n.color);
+          aura.setAttribute('opacity', '0.25');
+
+          // Star center circle
+          const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          dot.setAttribute('cx', n.x);
+          dot.setAttribute('cy', n.y);
+          dot.setAttribute('r', '7');
+          dot.setAttribute('fill', '#ffffff');
+          dot.setAttribute('stroke', n.color);
+          dot.setAttribute('stroke-width', '2.5');
+
+          // Label
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.setAttribute('x', n.x);
+          text.setAttribute('y', n.y + 26);
+          text.setAttribute('text-anchor', 'middle');
+          text.setAttribute('fill', '#e2e8f0');
+          text.setAttribute('font-family', 'var(--font-display)');
+          text.setAttribute('font-size', '11');
+          text.setAttribute('letter-spacing', '2');
+          text.textContent = n.name;
+
+          g.appendChild(aura);
+          g.appendChild(dot);
+          g.appendChild(text);
+          svg.appendChild(g);
+          nodeElements.push({ g, aura, dot, data: n });
+        });
+
+        // Trigger line draw
+        setTimeout(() => {
+          poly.setAttribute('stroke-dashoffset', '0');
+        }, 100);
+
+        // Reveal nodes sequentially
+        nodeElements.forEach((nodeObj, i) => {
+          setTimeout(() => {
+            nodeObj.g.setAttribute('opacity', '1');
+            playCineTone('node');
+          }, 350 + i * 400);
+        });
+
+        // Failure -> Learning Transformation highlight
+        const badgeFailure = document.getElementById('badge-failure');
+        const badgeLearning = document.getElementById('badge-learning');
+        const badgeGrowth = document.getElementById('badge-growth');
+
+        setTimeout(() => {
+          playCineTone('transform');
+
+          // FAILURE node visually blossoms into LEARNING star
+          const failureNode = nodeElements[3];
+          if (failureNode) {
+            failureNode.dot.setAttribute('stroke', '#38efd5');
+            failureNode.aura.setAttribute('fill', '#38efd5');
+            failureNode.aura.setAttribute('r', '22');
+            failureNode.aura.style.transition = 'all 1s ease';
+          }
+
+          badgeFailure.style.boxShadow = '0 0 25px rgba(239, 68, 68, 0.8)';
+          badgeLearning.style.boxShadow = '0 0 35px rgba(56, 239, 213, 0.9)';
+          badgeGrowth.style.boxShadow = '0 0 45px rgba(246, 200, 95, 1)';
+        }, 3200);
+
+        // Advance to Stage 5
+        CINE_STATE.stepTimer = setTimeout(() => {
+          goToCineStage(5);
+        }, 5800);
+      }
+
+      // --- STAGE 5: STEP-BY-STEP MEANING REVEAL ---
+      function setupStage5MeaningSteps() {
+        const stepCards = [
+          document.getElementById('meaning-step-1'),
+          document.getElementById('meaning-step-2'),
+          document.getElementById('meaning-step-3'),
+          document.getElementById('meaning-step-4'),
+          document.getElementById('meaning-step-5')
+        ];
+
+        function showStep(index) {
+          stepCards.forEach((c, idx) => {
+            if (idx === index) {
+              c.classList.add('active-step');
+            } else {
+              c.classList.remove('active-step');
+            }
+          });
+
+          // Sound reactions per step
+          if (index === 0) playCineTone('ethereal');
+          else if (index === 1) playCineTone('star-bell');
+          else if (index === 2) playBurnerWoosh();
+          else if (index === 3) playChime(false);
+          else if (index === 4) playCineTone('transform');
+        }
+
+        // Sequential triggers
+        showStep(0); // Think higher
+        CINE_STATE.stepTimer = setTimeout(() => {
+          showStep(1); // Dream higher
+          CINE_STATE.stepTimer = setTimeout(() => {
+            showStep(2); // Work towards it
+            CINE_STATE.stepTimer = setTimeout(() => {
+              showStep(3); // Even if you fall short...
+              CINE_STATE.stepTimer = setTimeout(() => {
+                showStep(4); // ...you are still farther than where you began
+                CINE_STATE.stepTimer = setTimeout(() => {
+                  goToCineStage(6); // To Split Screen
+                }, 4000);
+              }, 2800);
+            }, 2800);
+          }, 2800);
+        }, 2800);
+      }
+
+      // --- STAGE 6: INTERACTIVE SPLIT SCREEN CONTROLLER ---
+      function setupStage6SplitScreen() {
+        playCineTone('ethereal');
+        const wrapper = document.getElementById('split-screen-wrapper');
+        const splitRight = document.getElementById('split-right');
+        const splitHandleBar = document.getElementById('split-handle-bar');
+        const narrativeText = document.getElementById('split-narrative-text');
+        const nextBtn = document.getElementById('split-next-btn');
+
+        CINE_STATE.sliderPercent = 50;
+        updateSplitSlider(50);
+
+        function updateSplitSlider(pct) {
+          CINE_STATE.sliderPercent = pct;
+          splitRight.style.width = `${100 - pct}%`;
+          splitHandleBar.style.left = `${pct}%`;
+
+          // Dynamic Narrative text based on interaction
+          if (pct < 40) {
+            narrativeText.textContent = '“A higher thought permanently expands your possibilities.”';
+          } else if (pct > 65) {
+            narrativeText.textContent = '“A smaller thought confines you to a narrow ceiling.”';
+          } else {
+            narrativeText.textContent = '“Your thoughts don\'t just change your destination. They change how far you travel.”';
+          }
+        }
+
+        function handlePointerMove(e) {
+          if (!CINE_STATE.isDraggingSlider) return;
+          const rect = wrapper.getBoundingClientRect();
+          const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+          const rawPct = ((clientX - rect.left) / rect.width) * 100;
+          const clamped = Math.max(12, Math.min(88, rawPct));
+          updateSplitSlider(clamped);
+          playCineTone('slide');
+        }
+
+        wrapper.onpointerdown = function(e) {
+          CINE_STATE.isDraggingSlider = true;
+          wrapper.setPointerCapture(e.pointerId);
+          handlePointerMove(e);
+        };
+
+        wrapper.onpointermove = handlePointerMove;
+
+        wrapper.onpointerup = function(e) {
+          CINE_STATE.isDraggingSlider = false;
+          try { wrapper.releasePointerCapture(e.pointerId); } catch(err) {}
+        };
+
+        wrapper.onpointercancel = function() {
+          CINE_STATE.isDraggingSlider = false;
+        };
+
+        // Advance to Stage 7
+        nextBtn.onclick = function() {
+          goToCineStage(7);
+        };
+      }
+
+      // --- STAGE 7: FINAL COSMIC CLIMAX CONTROLLER ---
+      function setupStage7FinalClimax() {
+        playCineTone('grand-climax');
+        const msg1 = document.getElementById('final-msg-1');
+        const msg2 = document.getElementById('final-msg-2');
+        const msg3 = document.getElementById('final-msg-3');
+        const restartBtn = document.getElementById('cine-restart-btn');
+        const flyAgainBtn = document.getElementById('cine-fly-again-btn');
+
+        msg1.style.opacity = '0';
+        msg2.style.opacity = '0';
+        msg3.style.opacity = '0';
+
+        // Staggered reveal
+        setTimeout(() => {
+          msg1.style.transition = 'all 1.2s ease';
+          msg1.style.opacity = '1';
+        }, 400);
+
+        setTimeout(() => {
+          msg2.style.transition = 'all 1.2s ease';
+          msg2.style.opacity = '1';
+        }, 2600);
+
+        setTimeout(() => {
+          msg3.style.transition = 'all 1.4s ease';
+          msg3.style.opacity = '1';
+        }, 5200);
+
+        // Replay Visual Story Button
+        restartBtn.onclick = function() {
+          goToCineStage(1);
+        };
+
+        // Soar Again from Ground Button
+        flyAgainBtn.onclick = function() {
+          CINE_STATE.container.classList.remove('active');
+          CINE_STATE.container.style.display = 'none';
+          climaxOverlay.style.display = 'flex';
+          STATE.isZenithReached = false;
+          balloonRig.classList.remove('zenith-glow');
+          headerPrompt.style.opacity = '1';
+          STATE.targetAltitude = 0.05;
+          thoughtsLayer.innerHTML = '';
+          activeThoughts.length = 0;
+          setTimeout(spawnInitialThoughts, 600);
+        };
+      }
+
+      // --- CINEMATIC CANVAS RENDER TICK ---
+      function renderCineCanvas() {
+        if (!CINE_STATE.container.classList.contains('active') || !CINE_STATE.ctx) return;
+        const ctx = CINE_STATE.ctx;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Dynamic drifting stars
+        CINE_STATE.stars.forEach(s => {
+          s.y += s.speedY * (CINE_STATE.currentStage === 1 ? 2.5 : 1.0);
+          if (s.y > h) s.y = 0;
+          s.twinkle += 0.04;
+
+          const alpha = 0.4 + Math.sin(s.twinkle) * 0.45;
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1.0;
+      }
+
+      // Hook cinematic render into main tick loop
+      const originalTick = tick;
+      tick = function(currentTime) {
+        originalTick(currentTime);
+        renderCineCanvas();
+      };
+
+      // Launch application
+      spawnInitialThoughts();
+      requestAnimationFrame(tick);
+
+    })();
+  </script>
+</body>
+</html>

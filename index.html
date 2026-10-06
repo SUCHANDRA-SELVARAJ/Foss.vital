@@ -1,0 +1,1789 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>What Makes You Rise? — A Thirukkural Experience</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Mukta+Malar:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================
+       RESET & BASE VARIABLES
+       ========================================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    :root {
+      --font-display: 'Cinzel', serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-tamil: 'Mukta Malar', sans-serif;
+      
+      --color-gold: #f6c85f;
+      --color-gold-glow: rgba(246, 200, 95, 0.4);
+      --color-cyan-glow: rgba(56, 239, 213, 0.4);
+      --color-fear: #4a5568;
+      --color-doubt: #2d3748;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0b1021;
+      font-family: var(--font-body);
+      color: #ffffff;
+      touch-action: none;
+    }
+
+    /* Fullscreen Experience Container */
+    #experience-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Canvas for Dynamic Sky, Stars, Clouds, Auroras & Particles */
+    #sky-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Foreground Hill & Silhouette SVG Layer */
+    #ground-layer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 48%;
+      z-index: 2;
+      pointer-events: none;
+      transition: transform 0.1s linear, opacity 0.5s ease;
+      will-change: transform, opacity;
+    }
+
+    /* =========================================
+       HOT AIR BALLOON (INTERACTIVE HERO)
+       ========================================= */
+    #balloon-rig {
+      position: absolute;
+      left: 50%;
+      top: 68%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 310px;
+      z-index: 10;
+      cursor: grab;
+      will-change: transform, top, filter;
+      filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.45));
+    }
+
+    #balloon-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* Burner Flame Styles */
+    .burner-flame {
+      transform-origin: 110px 186px;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+      opacity: 0.65;
+    }
+
+    .burner-flame.firing {
+      transform: scale(2.2) translateY(-6px);
+      opacity: 1;
+      filter: drop-shadow(0 0 25px rgba(255, 170, 0, 0.95)) drop-shadow(0 0 50px rgba(255, 90, 0, 0.6));
+    }
+
+    .burner-glow-circle {
+      transition: opacity 0.3s ease, r 0.3s ease;
+      opacity: 0.35;
+    }
+
+    .burner-flame.firing ~ .burner-glow-circle,
+    .balloon-glow-burst {
+      opacity: 0.85 !important;
+    }
+
+    /* Dynamic Golden Aura on Zenith */
+    #balloon-rig.zenith-glow {
+      filter: drop-shadow(0 0 45px rgba(255, 215, 0, 0.85)) drop-shadow(0 0 90px rgba(255, 180, 50, 0.6));
+      animation: celestial-pulse 3s infinite alternate ease-in-out;
+    }
+
+    @keyframes celestial-pulse {
+      0% { transform: translate(-50%, -50%) scale(1.05); }
+      100% { transform: translate(-50%, -50%) scale(1.15); }
+    }
+
+    /* Altitude Float Text Floating Off Balloon */
+    .altitude-indicator-popup {
+      position: absolute;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      pointer-events: none;
+      z-index: 25;
+      animation: floatUpFade 1.4s forwards ease-out;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translateY(0) scale(0.7); }
+      20% { opacity: 1; transform: translateY(-15px) scale(1.1); }
+      100% { opacity: 0; transform: translateY(-65px) scale(0.9); }
+    }
+
+    /* =========================================
+       THOUGHT CARDS & BUBBLES
+       ========================================= */
+    #thoughts-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .thought-card {
+      position: absolute;
+      pointer-events: auto;
+      cursor: grab;
+      border-radius: 40px;
+      padding: 10px 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.4s ease;
+      will-change: transform, left, top;
+    }
+
+    .thought-card:active {
+      cursor: grabbing;
+    }
+
+    .thought-card:hover {
+      transform: scale(1.08) translateY(-3px);
+    }
+
+    .thought-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    /* Positive Thought Styling */
+    .thought-card.positive {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 215, 100, 0.08));
+      color: #fff9e6;
+      border: 1px solid rgba(255, 225, 120, 0.45);
+      box-shadow: 0 10px 30px rgba(246, 200, 95, 0.2), inset 0 0 15px rgba(255, 240, 180, 0.15);
+    }
+
+    .thought-card.positive:hover {
+      border-color: rgba(255, 235, 150, 0.85);
+      box-shadow: 0 12px 35px rgba(246, 200, 95, 0.45), inset 0 0 20px rgba(255, 245, 200, 0.3);
+    }
+
+    .thought-card.positive .thought-label {
+      background: linear-gradient(90deg, #ffffff, #ffe599);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Specific positive variants */
+    .thought-card[data-type="AMBITION"] {
+      border-color: rgba(255, 170, 80, 0.5);
+    }
+    .thought-card[data-type="COURAGE"] {
+      border-color: rgba(255, 105, 120, 0.5);
+    }
+    .thought-card[data-type="LEARNING"] {
+      border-color: rgba(100, 220, 255, 0.5);
+    }
+    .thought-card[data-type="DREAM"] {
+      border-color: rgba(190, 140, 255, 0.5);
+    }
+    .thought-card[data-type="EFFORT"] {
+      border-color: rgba(255, 215, 0, 0.6);
+    }
+
+    /* Negative Thought Styling */
+    .thought-card.negative {
+      background: linear-gradient(135deg, rgba(30, 35, 50, 0.75), rgba(15, 20, 30, 0.9));
+      color: #cbd5e0;
+      border: 1px solid rgba(120, 130, 155, 0.3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .thought-card.negative:hover {
+      border-color: rgba(160, 175, 200, 0.55);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .thought-card.negative .thought-label {
+      color: #a0aec0;
+    }
+
+    /* Card Dragging State */
+    .thought-card.dragging {
+      z-index: 50 !important;
+      opacity: 0.9;
+      transform: scale(1.15) !important;
+      transition: none !important;
+    }
+
+    /* Fly-to-Burner Arc Animation */
+    .thought-card.absorbing {
+      pointer-events: none;
+      transition: all 0.65s cubic-bezier(0.25, 1, 0.5, 1) !important;
+      transform: scale(0.2) rotate(45deg) !important;
+      opacity: 0 !important;
+      filter: blur(8px) brightness(2.5) !important;
+    }
+
+    /* =========================================
+       HEAD-UP DISPLAY (HUD) & PROMPT
+       ========================================= */
+    #ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 30px;
+    }
+
+    /* Header & Initial Prompt */
+    .header-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: opacity 0.6s ease;
+    }
+
+    .main-prompt-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4.2vw, 2.9rem);
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: #ffffff;
+      text-shadow: 0 4px 25px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 120, 0.3);
+      margin-bottom: 6px;
+      position: relative;
+    }
+
+    .prompt-subtext {
+      font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+      font-weight: 300;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(15, 23, 42, 0.35);
+      padding: 6px 18px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Top Corner Controls */
+    .top-controls {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      display: flex;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #ffffff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.08);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Altitude & Stage Bar */
+    .altitude-dashboard {
+      position: absolute;
+      left: 30px;
+      top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(12px);
+      padding: 12px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      min-width: 190px;
+    }
+
+    .altitude-stage-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .altitude-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .altitude-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .altitude-fill {
+      height: 100%;
+      width: 5%;
+      background: linear-gradient(90deg, #ff9a3c, #f6c85f, #38efd5);
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 0 10px rgba(246, 200, 95, 0.8);
+    }
+
+    .altitude-checkpoints {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 2px;
+    }
+
+    /* Bottom Interactive Tip */
+    .bottom-hint {
+      text-align: center;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      transition: opacity 0.4s ease;
+    }
+
+    /* =========================================
+       CLIMAX & THIRUKKURAL REVELATION MODAL
+       ========================================= */
+    #climax-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.82) 0%, rgba(5, 7, 18, 0.95) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #climax-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .climax-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 215, 120, 0.03));
+      border: 1px solid rgba(255, 220, 130, 0.35);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 80px rgba(246, 200, 95, 0.2);
+      border-radius: 28px;
+      padding: clamp(30px, 5vw, 60px);
+      max-width: 820px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .climax-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 215, 100, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+      animation: ambientRotate 20s linear infinite;
+    }
+
+    @keyframes ambientRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Phase 1: Philosophy prompt */
+    .climax-prelude {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3.2vw, 2.3rem);
+      line-height: 1.4;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #fff9e6;
+      margin-bottom: 28px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease 0.4s;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .climax-prelude strong {
+      color: var(--color-gold);
+      display: block;
+      font-size: 1.05em;
+    }
+
+    /* Divider */
+    .ornate-divider {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+      margin: 15px 0 28px;
+      opacity: 0;
+      transform: scaleX(0.2);
+      transition: all 1s ease 0.9s;
+    }
+
+    /* Phase 2: Tamil Thirukkural */
+    .kural-container {
+      margin-bottom: 26px;
+      opacity: 0;
+      transform: translateY(25px);
+      transition: all 1.2s ease 1.3s;
+    }
+
+    .kural-tag {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .kural-tamil-text {
+      font-family: var(--font-tamil);
+      font-size: clamp(1.45rem, 3.4vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.55;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 25px rgba(246, 200, 95, 0.4);
+    }
+
+    /* Phase 3: Short Meaning */
+    .kural-meaning {
+      font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+      font-weight: 300;
+      line-height: 1.6;
+      color: #e2e8f0;
+      max-width: 650px;
+      margin-bottom: 34px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1.1s ease 1.8s;
+      font-style: italic;
+    }
+
+    /* Reset / Soar Again Action */
+    .restart-btn {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease 2.2s;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 14px 38px;
+      border-radius: 35px;
+      color: #0b1021;
+      background: linear-gradient(135deg, #f6c85f, #f1a93b);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(246, 200, 95, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      outline: none;
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 14px 40px rgba(246, 200, 95, 0.6);
+    }
+
+    /* Revealing active elements */
+    #climax-overlay.active .climax-prelude,
+    #climax-overlay.active .ornate-divider,
+    #climax-overlay.active .kural-container,
+    #climax-overlay.active .kural-meaning,
+    #climax-overlay.active .restart-btn {
+      opacity: 1;
+      transform: translate(0, 0) scaleX(1);
+    }
+
+    /* Responsive Tweaks */
+    @media (max-width: 768px) {
+      #ui-overlay {
+        padding: 16px;
+      }
+      .altitude-dashboard {
+        left: 16px;
+        top: 16px;
+        min-width: 150px;
+        padding: 8px 14px;
+      }
+      .altitude-value {
+        font-size: 1.1rem;
+      }
+      .top-controls {
+        top: 16px;
+        right: 16px;
+      }
+      #balloon-rig {
+        width: 170px;
+        height: 240px;
+      }
+      .thought-card {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+        gap: 6px;
+      }
+      .thought-icon {
+        font-size: 1rem;
+      }
+      .header-zone {
+        margin-top: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="experience-container">
+    <!-- Dynamic Procedural Canvas (Sky, Clouds, Stars, Auroras, Stardust) -->
+    <canvas id="sky-canvas"></canvas>
+
+    <!-- Parallax Ground & Hills Layer (SVG) -->
+    <svg id="ground-layer" viewBox="0 0 1440 600" preserveAspectRatio="none">
+      <defs>
+        <!-- Mountain and hill gradients -->
+        <linearGradient id="hill-grad-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#28334f" stop-opacity="0.85" />
+          <stop offset="100%" stop-color="#151b2e" stop-opacity="1" />
+        </linearGradient>
+        <linearGradient id="hill-grad-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1e273e" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#0c111d" stop-opacity="1" />
+        </linearGradient>
+        <linearGradient id="hill-grad-front" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#161c2c" stop-opacity="1" />
+          <stop offset="100%" stop-color="#070a12" stop-opacity="1" />
+        </linearGradient>
+        <linearGradient id="ground-glow" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#f6c85f" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#f6c85f" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+
+      <!-- Soft ground morning glow -->
+      <ellipse cx="720" cy="500" rx="600" ry="200" fill="url(#ground-glow)" />
+
+      <!-- Distant rolling mountains -->
+      <path d="M0,280 C240,160 480,240 720,180 C960,120 1200,220 1440,160 L1440,600 L0,600 Z" fill="url(#hill-grad-back)" />
+      
+      <!-- Midground mountain ridge -->
+      <path d="M0,330 C300,260 550,340 850,290 C1150,240 1320,310 1440,280 L1440,600 L0,600 Z" fill="url(#hill-grad-mid)" />
+
+      <!-- Foreground hills with pine silhouettes -->
+      <path d="M0,410 C200,360 400,430 700,380 C1000,330 1250,420 1440,370 L1440,600 L0,600 Z" fill="url(#hill-grad-front)" />
+
+      <!-- Stylized Meadow Trees & Grass Accents -->
+      <g fill="#070a12">
+        <!-- Cluster 1 (Left) -->
+        <polygon points="120,440 135,390 150,440" />
+        <polygon points="123,410 135,370 147,410" />
+        <polygon points="150,460 162,415 174,460" />
+        <!-- Cluster 2 (Right) -->
+        <polygon points="1280,420 1295,365 1310,420" />
+        <polygon points="1283,385 1295,345 1307,385" />
+        <polygon points="1310,440 1322,390 1334,440" />
+      </g>
+    </svg>
+
+    <!-- Hot Air Balloon (Detailed Vector Artwork) -->
+    <div id="balloon-rig">
+      <svg id="balloon-svg" viewBox="0 0 220 310">
+        <defs>
+          <!-- Radial Burner Flame Gradient -->
+          <radialGradient id="flame-grad" cx="50%" cy="30%" r="50%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="25%" stop-color="#fff275" />
+            <stop offset="65%" stop-color="#ff7f11" />
+            <stop offset="100%" stop-color="#d62828" stop-opacity="0" />
+          </radialGradient>
+
+          <!-- Balloon Envelope Shadow & Luster -->
+          <linearGradient id="envelope-shading" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.38" />
+            <stop offset="35%" stop-color="#ffffff" stop-opacity="0.18" />
+            <stop offset="70%" stop-color="#000000" stop-opacity="0.05" />
+            <stop offset="100%" stop-color="#000000" stop-opacity="0.45" />
+          </linearGradient>
+
+          <!-- Balloon Stripe Gradients -->
+          <linearGradient id="stripe-crimson" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ff5e62" />
+            <stop offset="100%" stop-color="#ff3366" />
+          </linearGradient>
+          <linearGradient id="stripe-gold" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffe259" />
+            <stop offset="100%" stop-color="#ffa751" />
+          </linearGradient>
+          <linearGradient id="stripe-teal" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#2af598" />
+            <stop offset="100%" stop-color="#009efd" />
+          </linearGradient>
+          <linearGradient id="stripe-violet" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#b176fc" />
+            <stop offset="100%" stop-color="#6a11cb" />
+          </linearGradient>
+
+          <!-- Wicker Basket Gradient -->
+          <linearGradient id="basket-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#5c3818" />
+            <stop offset="50%" stop-color="#8c5828" />
+            <stop offset="100%" stop-color="#4a2b10" />
+          </linearGradient>
+
+          <!-- Zenith Golden Luster Gradient -->
+          <linearGradient id="zenith-envelope" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fff4cc" />
+            <stop offset="50%" stop-color="#ffd700" />
+            <stop offset="100%" stop-color="#ff9900" />
+          </linearGradient>
+        </defs>
+
+        <!-- Ambient Burner Light Aura -->
+        <circle id="burner-aura" class="burner-glow-circle" cx="110" cy="190" r="50" fill="url(#flame-grad)" opacity="0.3" />
+
+        <!-- Balloon Envelope Group -->
+        <g id="envelope-group">
+          <!-- Main Outer Balloon Silhouette -->
+          <path id="envelope-base" d="M110,10 C50,10 15,58 15,115 C15,152 45,182 82,194 L138,194 C175,182 205,152 205,115 C205,58 170,10 110,10 Z" fill="#1b2438" />
+
+          <!-- Beautiful Multi-colored Vertical Panels -->
+          <!-- Panel 1 (Leftmost edge) -->
+          <path d="M110,10 C62,10 25,58 15,115 C20,150 45,182 82,194 C55,180 35,145 35,115 C35,65 68,18 110,10 Z" fill="url(#stripe-violet)" />
+          <!-- Panel 2 -->
+          <path d="M110,10 C72,12 40,65 40,115 C40,145 60,178 85,194 C70,180 58,150 58,115 C58,68 80,18 110,10 Z" fill="url(#stripe-crimson)" />
+          <!-- Panel 3 -->
+          <path d="M110,10 C85,14 65,65 65,115 C65,150 82,185 95,194 C85,182 78,152 78,115 C78,65 92,15 110,10 Z" fill="url(#stripe-gold)" />
+          <!-- Panel 4 (Center Spine) -->
+          <path d="M110,10 C96,12 88,65 88,115 C88,155 102,192 110,194 C118,192 132,155 132,115 C132,65 124,12 110,10 Z" fill="url(#stripe-teal)" />
+          <!-- Panel 5 -->
+          <path d="M110,10 C128,14 142,65 142,115 C142,152 135,182 125,194 C138,185 155,150 155,115 C155,65 135,15 110,10 Z" fill="url(#stripe-gold)" />
+          <!-- Panel 6 -->
+          <path d="M110,10 C140,18 162,68 162,115 C162,150 150,180 135,194 C160,178 180,145 180,115 C180,65 148,12 110,10 Z" fill="url(#stripe-crimson)" />
+          <!-- Panel 7 (Rightmost edge) -->
+          <path d="M110,10 C152,18 185,65 185,115 C185,145 165,180 138,194 C175,182 200,150 205,115 C195,58 158,10 110,10 Z" fill="url(#stripe-violet)" />
+
+          <!-- Translucent 3D Volumetric Shading Overlay -->
+          <path d="M110,10 C50,10 15,58 15,115 C15,152 45,182 82,194 L138,194 C175,182 205,152 205,115 C205,58 170,10 110,10 Z" fill="url(#envelope-shading)" />
+
+          <!-- Golden Crown Cap at the Top -->
+          <ellipse cx="110" cy="11" rx="20" ry="5" fill="#ffd700" />
+          <ellipse cx="110" cy="9" rx="14" ry="3" fill="#ffffff" opacity="0.7" />
+          
+          <!-- Ornate Collar Ring at the Bottom Neck -->
+          <rect x="80" y="191" width="60" height="5" rx="2.5" fill="#ffd700" />
+        </g>
+
+        <!-- Burner Frame & Flame System -->
+        <g id="burner-group">
+          <!-- Burner Frame Rigging Metal -->
+          <line x1="88" y1="194" x2="102" y2="216" stroke="#94a3b8" stroke-width="1.8" />
+          <line x1="132" y1="194" x2="118" y2="216" stroke="#94a3b8" stroke-width="1.8" />
+          
+          <!-- Burner Nozzle -->
+          <rect x="101" y="212" width="18" height="6" rx="2" fill="#475569" stroke="#cbd5e1" stroke-width="0.8" />
+
+          <!-- Dynamic Fire Jet -->
+          <path id="burner-flame" class="burner-flame" d="M110,213 Q102,200 105,190 Q110,172 110,165 Q110,172 115,190 Q118,200 110,213 Z" fill="url(#flame-grad)" />
+        </g>
+
+        <!-- Suspension Ropes Connecting Envelope to Basket -->
+        <g stroke="#d4af37" stroke-width="1.2" opacity="0.85">
+          <line x1="84" y1="194" x2="94" y2="242" />
+          <line x1="94" y1="194" x2="98" y2="242" />
+          <line x1="126" y1="194" x2="122" y2="242" />
+          <line x1="136" y1="194" x2="126" y2="242" />
+        </g>
+
+        <!-- Woven Wicker Basket -->
+        <g id="basket-group">
+          <!-- Basket Rim -->
+          <rect x="91" y="240" width="38" height="5" rx="2" fill="#a06030" stroke="#ffd700" stroke-width="0.8" />
+          <!-- Basket Body -->
+          <path d="M93,245 L96,274 Q96,278 100,278 L120,278 Q124,278 124,274 L127,245 Z" fill="url(#basket-grad)" stroke="#3a1e08" stroke-width="1" />
+          <!-- Wicker Weave Texture Lines -->
+          <line x1="94" y1="254" x2="126" y2="254" stroke="#c48243" stroke-width="0.8" opacity="0.6" />
+          <line x1="95" y1="264" x2="125" y2="264" stroke="#c48243" stroke-width="0.8" opacity="0.6" />
+          <line x1="102" y1="245" x2="103" y2="278" stroke="#3a1e08" stroke-width="0.7" opacity="0.5" />
+          <line x1="110" y1="245" x2="110" y2="278" stroke="#3a1e08" stroke-width="0.7" opacity="0.5" />
+          <line x1="118" y1="245" x2="117" y2="278" stroke="#3a1e08" stroke-width="0.7" opacity="0.5" />
+          <!-- Basket Pennant Flag (Decorative) -->
+          <polygon points="127,250 137,255 127,260" fill="#f6c85f" />
+        </g>
+      </svg>
+    </div>
+
+    <!-- Floating Thought Bubbles / Cards Layer -->
+    <div id="thoughts-layer"></div>
+
+    <!-- UI Overlay / HUD -->
+    <div id="ui-overlay">
+      <!-- Top Left: Altitude Progress Tracker -->
+      <div class="altitude-dashboard">
+        <div class="altitude-stage-label">
+          <span id="altitude-realm">Earth Horizon</span>
+          <span id="altitude-percent">0%</span>
+        </div>
+        <div class="altitude-value" id="altitude-meters">150 m</div>
+        <div class="altitude-track">
+          <div class="altitude-fill" id="altitude-fill"></div>
+        </div>
+        <div class="altitude-checkpoints">
+          <span>Ground</span>
+          <span>Hills</span>
+          <span>Clouds</span>
+          <span>Stars</span>
+          <span>Zenith</span>
+        </div>
+      </div>
+
+      <!-- Top Right: Audio Mute & Info -->
+      <div class="top-controls">
+        <button id="audio-toggle" class="glass-btn" title="Toggle Sound Atmosphere" aria-label="Toggle Sound">
+          <span id="audio-icon">🔇</span>
+        </button>
+      </div>
+
+      <!-- Center Top: Philosophical Header & Prompt -->
+      <div class="header-zone" id="header-prompt">
+        <h1 class="main-prompt-title">What makes you rise?</h1>
+        <div class="prompt-subtext">
+          <span>✦ Drag or tap thoughts toward the balloon ✦</span>
+        </div>
+      </div>
+
+      <!-- Bottom Hint -->
+      <div class="bottom-hint" id="bottom-hint">
+        Every choice shifts your altitude
+      </div>
+    </div>
+
+    <!-- Climax / Zenith Reveal Overlay -->
+    <div id="climax-overlay">
+      <div class="climax-card">
+        <!-- Message 1 -->
+        <div class="climax-prelude">
+          “Your thoughts have weight.<br>
+          <strong>Choose what makes you rise.”</strong>
+        </div>
+
+        <div class="ornate-divider"></div>
+
+        <!-- Sacred Thirukkural Reveal -->
+        <div class="kural-container">
+          <span class="kural-tag">திருக்குறள் · அதிகாரம்: ஊக்கமுடைமை</span>
+          <div class="kural-tamil-text">
+            “உள்ளுவது எல்லாம் உயர்வுள்ளல் மற்றது<br>
+            தள்ளினும் தள்ளாமை நீர்த்து.”
+          </div>
+        </div>
+
+        <!-- Meaning -->
+        <div class="kural-meaning">
+          “Think high and aim high. Even if you don't reach the highest goal, the effort itself will take you higher.”
+        </div>
+
+        <!-- Soar Again Button -->
+        <button id="rise-again-btn" class="restart-btn">
+          <span>Rise Again</span>
+          <span>▲</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       THIRUKKURAL EXPERIENCE SCRIPT
+       Vanilla JavaScript - Responsive Canvas, Physics, Particles & Audio Engine
+       ========================================================================== */
+
+    (function() {
+      'use strict';
+
+      // --- CONFIGURATION & GAME STATE ---
+      const STATE = {
+        altitude: 0.05,       // Ranges from 0.0 to 1.0 (Zenith)
+        targetAltitude: 0.05,
+        balloonX: window.innerWidth / 2,
+        balloonY: window.innerHeight * 0.72,
+        balloonVelocityY: 0,
+        bobTimer: 0,
+        isZenithReached: false,
+        soundEnabled: false,
+        mousePos: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+      };
+
+      // Thought definitions
+      const THOUGHT_TEMPLATES = [
+        // Positive Thoughts
+        { id: 'ambition', label: 'AMBITION', type: 'positive', delta: 0.16, icon: '🔥', weight: 'uplifting' },
+        { id: 'effort', label: 'EFFORT', type: 'positive', delta: 0.15, icon: '⚡', weight: 'uplifting' },
+        { id: 'courage', label: 'COURAGE', type: 'positive', delta: 0.14, icon: '🦁', weight: 'uplifting' },
+        { id: 'dream', label: 'DREAM', type: 'positive', delta: 0.14, icon: '✨', weight: 'uplifting' },
+        { id: 'learning', label: 'LEARNING', type: 'positive', delta: 0.13, icon: '🌱', weight: 'uplifting' },
+        // Negative Thoughts
+        { id: 'fear', label: 'FEAR', type: 'negative', delta: -0.10, icon: '🌪️', weight: 'heavy' },
+        { id: 'doubt', label: 'DOUBT', type: 'negative', delta: -0.09, icon: '🌫️', weight: 'heavy' }
+      ];
+
+      // Altitude Realm Boundaries & Titles
+      const REALMS = [
+        { threshold: 0.0, name: 'Earth Meadows', meterBase: 120, maxMeters: 1200 },
+        { threshold: 0.22, name: 'Misty Highland Peaks', meterBase: 1200, maxMeters: 3500 },
+        { threshold: 0.48, name: 'Cloud Kingdom', meterBase: 3500, maxMeters: 7200 },
+        { threshold: 0.74, name: 'Starlit Aurora', meterBase: 7200, maxMeters: 14000 },
+        { threshold: 0.95, name: 'The Golden Zenith', meterBase: 14000, maxMeters: 25000 }
+      ];
+
+      // Color Palettes for Sky Transitions
+      const SKY_PALETTES = [
+        // 0. Ground Dawn (Warm amber, rose, pale lilac, morning glow)
+        { top: [18, 28, 55], mid: [82, 58, 90], bot: [235, 150, 100] },
+        // 1. Highland Mist (Misty indigo, twilight magenta, soft slate)
+        { top: [15, 20, 48], mid: [64, 45, 85], bot: [170, 110, 130] },
+        // 2. Cloud Realm (Deep amethyst, radiant rose-gold, silver lining)
+        { top: [12, 16, 40], mid: [45, 30, 75], bot: [120, 80, 140] },
+        // 3. Cosmic Aurora (Deep abyss blue, emerald & cyan ribbons, violet)
+        { top: [5, 7, 24], mid: [10, 22, 45], bot: [20, 40, 70] },
+        // 4. Zenith / Transcendence (Incandescent gold, stardust amber, celestial radiance)
+        { top: [18, 14, 38], mid: [85, 45, 70], bot: [246, 195, 95] }
+      ];
+
+      // DOM Elements
+      const canvas = document.getElementById('sky-canvas');
+      const ctx = canvas.getContext('2d');
+      const balloonRig = document.getElementById('balloon-rig');
+      const burnerFlame = document.getElementById('burner-flame');
+      const groundLayer = document.getElementById('ground-layer');
+      const thoughtsLayer = document.getElementById('thoughts-layer');
+      const altitudeFill = document.getElementById('altitude-fill');
+      const altitudeMeters = document.getElementById('altitude-meters');
+      const altitudeRealm = document.getElementById('altitude-realm');
+      const altitudePercent = document.getElementById('altitude-percent');
+      const audioToggle = document.getElementById('audio-toggle');
+      const audioIcon = document.getElementById('audio-icon');
+      const climaxOverlay = document.getElementById('climax-overlay');
+      const riseAgainBtn = document.getElementById('rise-again-btn');
+      const headerPrompt = document.getElementById('header-prompt');
+
+      // --- PROCEDURAL AUDIO SYNTHESIZER (Pure Web Audio API) ---
+      let audioCtx = null;
+      let windGain = null;
+
+      function initAudio() {
+        if (audioCtx) return;
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+
+          // Ambient Wind Filtered Noise Generator
+          const bufferSize = audioCtx.sampleRate * 2;
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+          }
+
+          const whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          whiteNoise.loop = true;
+
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(320, audioCtx.currentTime);
+          filter.Q.setValueAtTime(3.0, audioCtx.currentTime);
+
+          windGain = audioCtx.createGain();
+          windGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+
+          whiteNoise.connect(filter);
+          filter.connect(windGain);
+          windGain.connect(audioCtx.destination);
+          whiteNoise.start(0);
+
+          STATE.soundEnabled = true;
+          audioIcon.textContent = '🔊';
+        } catch (e) {
+          console.warn('Web Audio not supported or blocked:', e);
+        }
+      }
+
+      function toggleAudio() {
+        if (!audioCtx) {
+          initAudio();
+          return;
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+          STATE.soundEnabled = true;
+          audioIcon.textContent = '🔊';
+        } else if (STATE.soundEnabled) {
+          if (windGain) windGain.gain.setValueAtTime(0, audioCtx.currentTime);
+          STATE.soundEnabled = false;
+          audioIcon.textContent = '🔇';
+        } else {
+          if (windGain) windGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          STATE.soundEnabled = true;
+          audioIcon.textContent = '🔊';
+        }
+      }
+
+      audioToggle.addEventListener('click', toggleAudio);
+
+      // Play Sound Effects
+      function playBurnerWoosh() {
+        if (!STATE.soundEnabled || !audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.3);
+          osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.65);
+
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.65);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.65);
+        } catch(e) {}
+      }
+
+      function playChime(positive = true) {
+        if (!STATE.soundEnabled || !audioCtx) return;
+        try {
+          if (positive) {
+            // Ascending pentatonic chime
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.06);
+
+              gain.gain.setValueAtTime(0.12, audioCtx.currentTime + idx * 0.06);
+              gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + idx * 0.06 + 0.8);
+
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(audioCtx.currentTime + idx * 0.06);
+              osc.stop(audioCtx.currentTime + idx * 0.06 + 0.85);
+            });
+          } else {
+            // Low heavy descending thud
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime + 0.4);
+
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.45);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.45);
+          }
+        } catch(e) {}
+      }
+
+      function playZenithChord() {
+        if (!STATE.soundEnabled || !audioCtx) return;
+        try {
+          // Lush Celestial Major 9th chord
+          const chord = [261.63, 392.00, 523.25, 659.25, 783.99, 987.77, 1174.66];
+          chord.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.08);
+
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i * 0.08 + 3.5);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + i * 0.08);
+            osc.stop(audioCtx.currentTime + i * 0.08 + 3.6);
+          });
+        } catch(e) {}
+      }
+
+      // --- CANVAS RESIZING & PARTICLES SYSTEM ---
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.scale(dpr, dpr);
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      // Procedural Background Elements: Stars, Clouds, Auroras & Embers
+      const STARS = [];
+      for (let i = 0; i < 160; i++) {
+        STARS.push({
+          x: Math.random(),
+          y: Math.random(),
+          size: Math.random() * 2 + 0.6,
+          twinkleSpeed: Math.random() * 0.03 + 0.01,
+          phase: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.3 ? '#ffffff' : (Math.random() > 0.5 ? '#ffe39f' : '#b6e3ff')
+        });
+      }
+
+      // Volumetric Cloud Puffs
+      const CLOUDS = [];
+      for (let i = 0; i < 14; i++) {
+        CLOUDS.push({
+          x: Math.random() * width,
+          y: Math.random() * (height * 1.5) - height * 0.2,
+          radius: Math.random() * 80 + 50,
+          speed: Math.random() * 0.3 + 0.1,
+          opacity: Math.random() * 0.35 + 0.15,
+          verticalLayer: Math.random() // altitude affinity (0.35 - 0.75)
+        });
+      }
+
+      // Dynamic Particles (Embers, Sparkles, Smoke)
+      const PARTICLES = [];
+
+      function spawnParticles(x, y, count, type) {
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * (type === 'zenith' ? 6 : 4) + 1;
+          PARTICLES.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - (type === 'ember' ? 2 : 0),
+            size: Math.random() * (type === 'smoke' ? 14 : 4) + 2,
+            life: 1.0,
+            decay: Math.random() * 0.02 + (type === 'zenith' ? 0.008 : 0.02),
+            type: type, // 'ember', 'sparkle', 'smoke', 'zenith'
+            color: type === 'smoke' 
+              ? `rgba(${Math.floor(80 + Math.random()*40)}, ${Math.floor(90 + Math.random()*40)}, 110, ` 
+              : (type === 'zenith' 
+                  ? `rgba(255, ${Math.floor(210 + Math.random()*45)}, ${Math.floor(100 + Math.random()*155)}, `
+                  : `rgba(255, ${Math.floor(180 + Math.random()*70)}, 80, `)
+          });
+        }
+      }
+
+      // --- SKY COLOR INTERPOLATION ---
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function lerpColor(c1, c2, t) {
+        return [
+          Math.round(lerp(c1[0], c2[0], t)),
+          Math.round(lerp(c1[1], c2[1], t)),
+          Math.round(lerp(c1[2], c2[2], t))
+        ];
+      }
+
+      function getSkyGradient(alt) {
+        // Clamp altitude
+        const clamped = Math.max(0, Math.min(1, alt));
+        const segmentCount = SKY_PALETTES.length - 1;
+        const segment = Math.min(Math.floor(clamped * segmentCount), segmentCount - 1);
+        const t = (clamped - segment / segmentCount) * segmentCount;
+
+        const p1 = SKY_PALETTES[segment];
+        const p2 = SKY_PALETTES[segment + 1];
+
+        const top = lerpColor(p1.top, p2.top, t);
+        const mid = lerpColor(p1.mid, p2.mid, t);
+        const bot = lerpColor(p1.bot, p2.bot, t);
+
+        return {
+          top: `rgb(${top.join(',')})`,
+          mid: `rgb(${mid.join(',')})`,
+          bot: `rgb(${bot.join(',')})`
+        };
+      }
+
+      // --- THOUGHT BUBBLES SPAWN & INTERACTION ---
+      const activeThoughts = [];
+      let draggedThought = null;
+      let dragOffset = { x: 0, y: 0 };
+
+      function createThoughtElement(data, initialX, initialY) {
+        const card = document.createElement('div');
+        card.className = `thought-card ${data.type}`;
+        card.dataset.id = data.id;
+        card.dataset.type = data.label;
+        card.dataset.delta = data.delta;
+        
+        card.innerHTML = `
+          <span class="thought-icon">${data.icon}</span>
+          <span class="thought-label">${data.label}</span>
+        `;
+
+        // Position & Float physics properties
+        card.style.left = `${initialX}px`;
+        card.style.top = `${initialY}px`;
+
+        const thoughtObj = {
+          el: card,
+          data: data,
+          x: initialX,
+          y: initialY,
+          originX: initialX,
+          originY: initialY,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          floatPhase: Math.random() * Math.PI * 2,
+          floatSpeed: Math.random() * 0.03 + 0.015,
+          isDragging: false,
+          isAbsorbing: false
+        };
+
+        // Attach Drag & Click Handlers
+        attachThoughtInteractions(thoughtObj);
+        thoughtsLayer.appendChild(card);
+        activeThoughts.push(thoughtObj);
+      }
+
+      function attachThoughtInteractions(tObj) {
+        const el = tObj.el;
+
+        // Pointer down (Mouse or Touch)
+        el.addEventListener('pointerdown', (e) => {
+          if (tObj.isAbsorbing || STATE.isZenithReached) return;
+          initAudio(); // Initialize audio on first click/touch interaction
+          
+          draggedThought = tObj;
+          tObj.isDragging = true;
+          tObj.dragStartX = e.clientX;
+          tObj.dragStartY = e.clientY;
+          tObj.hasMoved = false;
+
+          const rect = el.getBoundingClientRect();
+          dragOffset.x = e.clientX - rect.left;
+          dragOffset.y = e.clientY - rect.top;
+
+          el.classList.add('dragging');
+          el.setPointerCapture(e.pointerId);
+          e.stopPropagation();
+        });
+
+        el.addEventListener('pointermove', (e) => {
+          if (tObj.isDragging) {
+            const dist = Math.hypot(e.clientX - tObj.dragStartX, e.clientY - tObj.dragStartY);
+            if (dist > 6) tObj.hasMoved = true;
+
+            tObj.x = e.clientX - dragOffset.x;
+            tObj.y = e.clientY - dragOffset.y;
+            el.style.left = `${tObj.x}px`;
+            el.style.top = `${tObj.y}px`;
+
+            // Check proximity to balloon for magnetic suction hint
+            checkBalloonProximity(tObj);
+          }
+        });
+
+        el.addEventListener('pointerup', (e) => {
+          if (tObj.isDragging) {
+            tObj.isDragging = false;
+            el.classList.remove('dragging');
+            el.releasePointerCapture(e.pointerId);
+            draggedThought = null;
+
+            // If user clicked without dragging, initiate graceful flight into burner!
+            if (!tObj.hasMoved) {
+              absorbThought(tObj);
+            } else {
+              // Drag release: if near balloon basket/burner, absorb, else release to float
+              const balloonCenter = getBalloonCenter();
+              const dist = Math.hypot(tObj.x + 60 - balloonCenter.x, tObj.y + 20 - balloonCenter.y);
+              if (dist < 180) {
+                absorbThought(tObj);
+              }
+            }
+          }
+        });
+
+        el.addEventListener('pointercancel', () => {
+          if (tObj.isDragging) {
+            tObj.isDragging = false;
+            el.classList.remove('dragging');
+            draggedThought = null;
+          }
+        });
+      }
+
+      function getBalloonCenter() {
+        const rect = balloonRig.getBoundingClientRect();
+        return {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height * 0.65 // Around the burner and basket
+        };
+      }
+
+      function checkBalloonProximity(tObj) {
+        const balloonCenter = getBalloonCenter();
+        const dist = Math.hypot(tObj.x + 60 - balloonCenter.x, tObj.y + 20 - balloonCenter.y);
+        if (dist < 180) {
+          balloonRig.style.filter = tObj.data.type === 'positive'
+            ? 'drop-shadow(0 0 35px rgba(246, 200, 95, 0.75))'
+            : 'drop-shadow(0 0 30px rgba(60, 70, 90, 0.75))';
+        } else {
+          balloonRig.style.filter = '';
+        }
+      }
+
+      // Absorb Thought into the Balloon Burner
+      function absorbThought(tObj) {
+        if (tObj.isAbsorbing) return;
+        tObj.isAbsorbing = true;
+
+        const el = tObj.el;
+        const balloonCenter = getBalloonCenter();
+
+        // Animate card shrinking & flying into burner
+        el.style.left = `${balloonCenter.x - 50}px`;
+        el.style.top = `${balloonCenter.y - 20}px`;
+        el.classList.add('absorbing');
+
+        const isPositive = tObj.data.type === 'positive';
+
+        // Trigger burner effects
+        setTimeout(() => {
+          if (isPositive) {
+            // Flare up the burner flame!
+            burnerFlame.classList.add('firing');
+            playBurnerWoosh();
+            playChime(true);
+            spawnParticles(balloonCenter.x, balloonCenter.y - 20, 35, 'ember');
+            showAltitudePopup(`+ ${tObj.data.label}`, '#f6c85f', balloonCenter.x, balloonCenter.y - 60);
+            
+            setTimeout(() => {
+              burnerFlame.classList.remove('firing');
+            }, 650);
+          } else {
+            // Negative thought drags balloon slightly down, releases dark smoke
+            playChime(false);
+            spawnParticles(balloonCenter.x, balloonCenter.y + 20, 25, 'smoke');
+            showAltitudePopup(`- ${tObj.data.label}`, '#cbd5e0', balloonCenter.x, balloonCenter.y - 20);
+            
+            // Wobble balloon downwards
+            STATE.balloonVelocityY += 4.5;
+          }
+
+          // Apply Altitude Shift
+          applyAltitudeDelta(tObj.data.delta);
+
+          // Remove element from DOM and active array
+          el.remove();
+          const idx = activeThoughts.indexOf(tObj);
+          if (idx !== -1) activeThoughts.splice(idx, 1);
+
+          // Replenish thoughts after a brief moment
+          if (!STATE.isZenithReached) {
+            setTimeout(replenishThoughts, 1200);
+          }
+        }, 320);
+      }
+
+      function showAltitudePopup(text, color, x, y) {
+        const popup = document.createElement('div');
+        popup.className = 'altitude-indicator-popup';
+        popup.style.color = color;
+        popup.style.left = `${x}px`;
+        popup.style.top = `${y}px`;
+        popup.textContent = text;
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 1400);
+      }
+
+      function applyAltitudeDelta(delta) {
+        STATE.targetAltitude = Math.max(0.02, Math.min(1.0, STATE.targetAltitude + delta));
+
+        // Upward/Downward physical kick to balloon position
+        if (delta > 0) {
+          STATE.balloonVelocityY -= delta * 50;
+        } else {
+          STATE.balloonVelocityY -= delta * 30;
+        }
+
+        // Check for Zenith completion!
+        if (STATE.targetAltitude >= 0.999 && !STATE.isZenithReached) {
+          triggerZenithClimax();
+        }
+      }
+
+      // Initial Spawn of Thought Bubbles in Scenic Orbital Positions
+      function spawnInitialThoughts() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        // Position coordinates circling the balloon
+        const positions = [
+          { x: w * 0.16, y: h * 0.35 },
+          { x: w * 0.22, y: h * 0.62 },
+          { x: w * 0.32, y: h * 0.44 },
+          { x: w * 0.68, y: h * 0.38 },
+          { x: w * 0.78, y: h * 0.58 },
+          { x: w * 0.82, y: h * 0.35 },
+          { x: w * 0.28, y: h * 0.22 }
+        ];
+
+        THOUGHT_TEMPLATES.forEach((template, i) => {
+          const pos = positions[i % positions.length];
+          // Slight jitter for organic placement
+          const jx = pos.x + (Math.random() - 0.5) * 40;
+          const jy = pos.y + (Math.random() - 0.5) * 40;
+          createThoughtElement(template, jx, jy);
+        });
+      }
+
+      function replenishThoughts() {
+        if (activeThoughts.length >= 6 || STATE.isZenithReached) return;
+
+        // Select a template prioritizing positive if altitude is low
+        const rand = Math.random();
+        let selectedTemplate;
+        if (rand < 0.75) {
+          const positives = THOUGHT_TEMPLATES.filter(t => t.type === 'positive');
+          selectedTemplate = positives[Math.floor(Math.random() * positives.length)];
+        } else {
+          const negatives = THOUGHT_TEMPLATES.filter(t => t.type === 'negative');
+          selectedTemplate = negatives[Math.floor(Math.random() * negatives.length)];
+        }
+
+        // Spawn smoothly drifting in from left or right edge
+        const fromLeft = Math.random() > 0.5;
+        const spawnX = fromLeft ? -120 : window.innerWidth + 30;
+        const targetX = fromLeft 
+          ? window.innerWidth * (0.12 + Math.random() * 0.25)
+          : window.innerWidth * (0.65 + Math.random() * 0.22);
+        const spawnY = window.innerHeight * (0.25 + Math.random() * 0.45);
+
+        createThoughtElement(selectedTemplate, targetX, spawnY);
+      }
+
+      // --- THE ZENITH CLIMAX TRANSFORMATION ---
+      function triggerZenithClimax() {
+        STATE.isZenithReached = true;
+        STATE.targetAltitude = 1.0;
+        balloonRig.classList.add('zenith-glow');
+
+        // Play transcendent celestial harmony
+        playZenithChord();
+
+        // Burst of glorious stardust particles
+        const center = getBalloonCenter();
+        spawnParticles(center.x, center.y, 120, 'zenith');
+
+        // Fade out header prompt and thoughts
+        headerPrompt.style.opacity = '0';
+        activeThoughts.forEach(t => {
+          t.el.style.transition = 'all 1.5s ease';
+          t.el.style.opacity = '0';
+          t.el.style.transform = 'scale(0.5) translateY(-50px)';
+        });
+
+        // Continuous stardust rain during climax
+        const zenithInterval = setInterval(() => {
+          if (!STATE.isZenithReached) {
+            clearInterval(zenithInterval);
+            return;
+          }
+          spawnParticles(Math.random() * width, Math.random() * height * 0.6, 6, 'zenith');
+        }, 180);
+
+        // Reveal the Climax Modal
+        setTimeout(() => {
+          climaxOverlay.classList.add('active');
+        }, 1600);
+      }
+
+      // Rise Again / Replay Reset
+      riseAgainBtn.addEventListener('click', () => {
+        climaxOverlay.classList.remove('active');
+        STATE.isZenithReached = false;
+        balloonRig.classList.remove('zenith-glow');
+        headerPrompt.style.opacity = '1';
+        
+        // Reset altitude smoothly to ground
+        STATE.targetAltitude = 0.05;
+
+        // Clean up thoughts and respawn fresh ones
+        thoughtsLayer.innerHTML = '';
+        activeThoughts.length = 0;
+        setTimeout(spawnInitialThoughts, 600);
+      });
+
+      // --- MAIN ANIMATION & RENDER LOOP ---
+      let lastTime = performance.now();
+
+      function update(dt) {
+        // Smoothly interpolate altitude toward target altitude
+        STATE.altitude += (STATE.targetAltitude - STATE.altitude) * 0.045;
+
+        // Balloon physical floating & spring dynamics
+        STATE.bobTimer += dt * 0.002;
+        const idleBob = Math.sin(STATE.bobTimer) * 12;
+        const idleSway = Math.cos(STATE.bobTimer * 0.7) * 4;
+
+        // Vertical position of balloon relative to altitude
+        // When altitude is 0%, balloon sits low near bottom.
+        // When altitude increases, balloon rises gracefully towards top third of screen.
+        const baseY = height * lerp(0.72, 0.38, Math.pow(STATE.altitude, 0.75));
+        
+        // Velocity spring damping
+        STATE.balloonVelocityY *= 0.88;
+        const targetY = baseY + idleBob + STATE.balloonVelocityY;
+        STATE.balloonY += (targetY - STATE.balloonY) * 0.12;
+
+        // Horizontal sway towards mouse center
+        const targetX = width * 0.5 + idleSway + (STATE.mousePos.x - width * 0.5) * 0.04;
+        STATE.balloonX += (targetX - STATE.balloonX) * 0.08;
+
+        // Balloon tilt based on lateral velocity and wind
+        const tilt = (targetX - STATE.balloonX) * 0.35 + idleSway * 0.5;
+
+        balloonRig.style.left = `${STATE.balloonX}px`;
+        balloonRig.style.top = `${STATE.balloonY}px`;
+        balloonRig.style.transform = `translate(-50%, -50%) rotate(${tilt}deg)`;
+
+        // Parallax Ground Layer Motion: sinking out of view as altitude increases
+        const groundOffsetY = STATE.altitude * height * 1.25;
+        const groundOpacity = Math.max(0, 1 - STATE.altitude * 3.5);
+        groundLayer.style.transform = `translateY(${groundOffsetY}px)`;
+        groundLayer.style.opacity = groundOpacity;
+
+        // Update HUD Values
+        updateHUD();
+
+        // Update Thought Cards Floating Physics
+        updateThoughts(dt);
+
+        // Update Dynamic Particles
+        updateParticles();
+      }
+
+      function updateHUD() {
+        const alt = STATE.altitude;
+        const percent = Math.min(100, Math.round(alt * 100));
+        altitudePercent.textContent = `${percent}%`;
+        altitudeFill.style.width = `${Math.max(5, percent)}%`;
+
+        // Calculate Meters and Realm Title
+        let currentRealm = REALMS[0];
+        for (let i = REALMS.length - 1; i >= 0; i--) {
+          if (alt >= REALMS[i].threshold) {
+            currentRealm = REALMS[i];
+            break;
+          }
+        }
+        altitudeRealm.textContent = currentRealm.name;
+
+        // Smooth meter calculation across realms
+        const meters = Math.round(lerp(150, 24800, Math.pow(alt, 1.2)));
+        altitudeMeters.textContent = `${meters.toLocaleString()} m`;
+      }
+
+      function updateThoughts(dt) {
+        const time = performance.now() * 0.0015;
+
+        activeThoughts.forEach((t) => {
+          if (t.isDragging || t.isAbsorbing) return;
+
+          // Gentle orbital floating motion
+          t.floatPhase += t.floatSpeed;
+          const floatOffset = Math.sin(t.floatPhase) * 14;
+          const swayOffset = Math.cos(t.floatPhase * 0.8) * 10;
+
+          // Slight repulsion from the balloon rig so they don't block the artwork
+          const dx = t.x - STATE.balloonX;
+          const dy = t.y - STATE.balloonY;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 130 && dist > 1) {
+            t.x += (dx / dist) * 1.8;
+            t.y += (dy / dist) * 1.8;
+          }
+
+          // Gentle return to origin neighborhood
+          t.x += (t.originX + swayOffset - t.x) * 0.02;
+          t.y += (t.originY + floatOffset - t.y) * 0.02;
+
+          t.el.style.left = `${t.x}px`;
+          t.el.style.top = `${t.y}px`;
+        });
+      }
+
+      function updateParticles() {
+        for (let i = PARTICLES.length - 1; i >= 0; i--) {
+          const p = PARTICLES[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life -= p.decay;
+
+          if (p.type === 'smoke') {
+            p.size += 0.35;
+            p.vx *= 0.96;
+            p.vy *= 0.96;
+          } else if (p.type === 'ember') {
+            p.vy -= 0.08; // upward buoyancy
+            p.vx += (Math.random() - 0.5) * 0.2;
+          }
+
+          if (p.life <= 0) {
+            PARTICLES.splice(i, 1);
+          }
+        }
+      }
+
+      // --- CANVAS RENDERING (SKY, STARS, AURORA, VOLUMETRIC CLOUDS) ---
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Dynamic Atmosphere Sky Gradient
+        const skyColors = getSkyGradient(STATE.altitude);
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
+        skyGrad.addColorStop(0, skyColors.top);
+        skyGrad.addColorStop(0.55, skyColors.mid);
+        skyGrad.addColorStop(1, skyColors.bot);
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // 2. Stars and Constellations (Density grows with Altitude)
+        const starOpacity = Math.max(0, Math.min(1, (STATE.altitude - 0.2) / 0.65));
+        if (starOpacity > 0.01) {
+          ctx.save();
+          STARS.forEach((star) => {
+            star.phase += star.twinkleSpeed;
+            const twinkle = (Math.sin(star.phase) + 1) * 0.5;
+            const alpha = starOpacity * (0.35 + twinkle * 0.65);
+            ctx.fillStyle = star.color;
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.arc(star.x * width, star.y * height, star.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Radiant cross bloom on brighter stars
+            if (star.size > 2.2 && twinkle > 0.8) {
+              ctx.strokeStyle = star.color;
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              ctx.moveTo(star.x * width - 6, star.y * height);
+              ctx.lineTo(star.x * width + 6, star.y * height);
+              ctx.moveTo(star.x * width, star.y * height - 6);
+              ctx.lineTo(star.x * width, star.y * height + 6);
+              ctx.stroke();
+            }
+          });
+          ctx.restore();
+        }
+
+        // 3. Aurora Borealis Ribbon Waves (High Altitude: 0.65 - 1.0)
+        const auroraOpacity = Math.max(0, Math.min(1, (STATE.altitude - 0.55) / 0.4));
+        if (auroraOpacity > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = auroraOpacity * 0.45;
+          const time = performance.now() * 0.0008;
+
+          // Emerald & Cyan Aurora Stream
+          ctx.beginPath();
+          ctx.moveTo(0, height * 0.25);
+          for (let x = 0; x <= width; x += 40) {
+            const wave1 = Math.sin(x * 0.003 + time) * 60;
+            const wave2 = Math.cos(x * 0.006 - time * 0.7) * 35;
+            ctx.lineTo(x, height * 0.25 + wave1 + wave2);
+          }
+          ctx.lineTo(width, 0);
+          ctx.lineTo(0, 0);
+          ctx.closePath();
+
+          const auroraGrad = ctx.createLinearGradient(0, 0, 0, height * 0.45);
+          auroraGrad.addColorStop(0, 'rgba(56, 239, 213, 0)');
+          auroraGrad.addColorStop(0.5, 'rgba(56, 239, 213, 0.45)');
+          auroraGrad.addColorStop(0.85, 'rgba(168, 85, 247, 0.35)');
+          auroraGrad.addColorStop(1, 'rgba(168, 85, 247, 0)');
+          ctx.fillStyle = auroraGrad;
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 4. Volumetric Drifting Clouds (Mid Altitude: 0.25 - 0.85)
+        const cloudGlobalAlpha = Math.max(0, Math.min(1, 1 - Math.abs(STATE.altitude - 0.55) * 2.2));
+        if (cloudGlobalAlpha > 0.02) {
+          ctx.save();
+          CLOUDS.forEach((c) => {
+            c.x += c.speed;
+            if (c.x - c.radius > width) c.x = -c.radius * 2;
+
+            // Parallax vertical offset
+            const cloudY = c.y + (1 - STATE.altitude) * 200;
+
+            const cloudGrad = ctx.createRadialGradient(
+              c.x, cloudY, c.radius * 0.1,
+              c.x, cloudY, c.radius
+            );
+            cloudGrad.addColorStop(0, `rgba(255, 255, 255, ${c.opacity * cloudGlobalAlpha})`);
+            cloudGrad.addColorStop(0.65, `rgba(240, 220, 245, ${c.opacity * 0.5 * cloudGlobalAlpha})`);
+            cloudGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            ctx.fillStyle = cloudGrad;
+            ctx.beginPath();
+            ctx.arc(c.x, cloudY, c.radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          ctx.restore();
+        }
+
+        // 5. Draw Dynamic Particles
+        if (PARTICLES.length > 0) {
+          ctx.save();
+          PARTICLES.forEach((p) => {
+            ctx.fillStyle = `${p.color}${p.life})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          ctx.restore();
+        }
+      }
+
+      // --- MAIN ENGINE TICK ---
+      function tick(currentTime) {
+        const dt = Math.min(currentTime - lastTime, 64);
+        lastTime = currentTime;
+
+        update(dt);
+        render();
+
+        requestAnimationFrame(tick);
+      }
+
+      // --- USER INPUT TRACKING ---
+      window.addEventListener('pointermove', (e) => {
+        STATE.mousePos.x = e.clientX;
+        STATE.mousePos.y = e.clientY;
+      });
+
+      // Launch application
+      spawnInitialThoughts();
+      requestAnimationFrame(tick);
+
+    })();
+  </script>
+</body>
+</html>
+
